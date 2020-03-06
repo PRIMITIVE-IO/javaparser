@@ -21,17 +21,13 @@
 
 package com.github.javaparser.ast.validator.chunks;
 
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.validator.SimpleValidator;
 import com.github.javaparser.ast.validator.SingleNodeTypeValidator;
-import com.github.javaparser.ast.validator.TreeVisitorValidator;
 import com.github.javaparser.ast.validator.Validators;
-import com.github.javaparser.metamodel.NodeMetaModel;
-import com.github.javaparser.metamodel.PropertyMetaModel;
 
 /**
  * Contains validations that are valid for every Java version.
@@ -70,21 +66,7 @@ public class CommonValidators extends Validators {
                     }
                     reporter.report(n.getTarget(), "Illegal left hand side of an assignment.");
                 }
-                ),
-                new TreeVisitorValidator((node, problemReporter) -> {
-                    NodeMetaModel mm = node.getMetaModel();
-                    for (PropertyMetaModel ppm : mm.getAllPropertyMetaModels()) {
-                        if (ppm.isNonEmpty()) {
-                            if (ppm.isNodeList()) {
-                                NodeList<?> value = (NodeList<?>) ppm.getValue(node);
-                                if (value.isEmpty()) {
-                                    problemReporter.report(node, "%s.%s can not be empty.", mm.getTypeName(), ppm.getName());
-                                }
-                            }
-                            // No need to check empty strings, it should be impossible to set them to ""
-                        }
-                    }
-                })
+                )
         );
     }
 }

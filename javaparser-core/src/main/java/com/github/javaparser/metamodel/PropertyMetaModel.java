@@ -249,9 +249,14 @@ public class PropertyMetaModel {
                     }
                 }
             }
-            throw new NoSuchFieldError(getName());
         } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
+            // ignore
+        }
+        catch (IllegalArgumentException e) {
+            // ignore
+        }
+        finally {
+            return null;
         }
     }
 }
