@@ -90,7 +90,13 @@ public class MethodDeclarationCommonLogic {
     }
 
     protected Optional<ResolvedType> typeParamByName(String name, Context context) {
-        return methodDeclaration.getTypeParameters().stream().filter(tp -> tp.getName().equals(name)).map(tp -> toType(tp)).findFirst();
+        for (ResolvedTypeParameterDeclaration tp : methodDeclaration.getTypeParameters()) {
+            if (tp.getName().equals(name)) {
+                ResolvedType resolvedType = toType(tp);
+                return Optional.of(resolvedType);
+            }
+        }
+        return Optional.empty();
     }
 
     protected ResolvedType toType(ResolvedTypeParameterDeclaration typeParameterDeclaration) {

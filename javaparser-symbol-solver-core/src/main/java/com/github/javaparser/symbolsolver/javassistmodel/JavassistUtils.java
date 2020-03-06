@@ -92,7 +92,17 @@ class JavassistUtils {
     static ResolvedType signatureTypeToType(SignatureAttribute.Type signatureType, TypeSolver typeSolver, ResolvedTypeParametrizable typeParametrizable) {
         if (signatureType instanceof SignatureAttribute.ClassType) {
             SignatureAttribute.ClassType classType = (SignatureAttribute.ClassType) signatureType;
-            List<ResolvedType> typeArguments = classType.getTypeArguments() == null ? Collections.emptyList() : Arrays.stream(classType.getTypeArguments()).map(ta -> typeArgumentToType(ta, typeSolver, typeParametrizable)).collect(Collectors.toList());
+            List<ResolvedType> typeArguments;
+            if (classType.getTypeArguments() == null) {
+                typeArguments = Collections.emptyList();
+            } else {
+                List<ResolvedType> list = new ArrayList<>();
+                for (SignatureAttribute.TypeArgument ta : classType.getTypeArguments()) {
+                    ResolvedType resolvedType = typeArgumentToType(ta, typeSolver, typeParametrizable);
+                    list.add(resolvedType);
+                }
+                typeArguments = list;
+            }
             ResolvedReferenceTypeDeclaration typeDeclaration = typeSolver.solveType(
                     removeTypeArguments(internalNameToCanonicalName(getTypeName(classType))));
             return new ReferenceTypeImpl(typeDeclaration, typeArguments, typeSolver);

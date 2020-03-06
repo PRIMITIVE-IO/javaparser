@@ -183,7 +183,12 @@ public class JavassistMethodDeclaration implements ResolvedMethodDeclaration, Ty
                 return new ArrayList<>();
             }
             SignatureAttribute.MethodSignature methodSignature = SignatureAttribute.toMethodSignature(ctMethod.getGenericSignature());
-            return Arrays.stream(methodSignature.getTypeParameters()).map((jasTp) -> new JavassistTypeParameter(jasTp, this, typeSolver)).collect(Collectors.toList());
+            List<ResolvedTypeParameterDeclaration> list = new ArrayList<>();
+            for (SignatureAttribute.TypeParameter jasTp : methodSignature.getTypeParameters()) {
+                JavassistTypeParameter javassistTypeParameter = new JavassistTypeParameter(jasTp, this, typeSolver);
+                list.add(javassistTypeParameter);
+            }
+            return list;
         } catch (BadBytecode badBytecode) {
             throw new RuntimeException(badBytecode);
         }

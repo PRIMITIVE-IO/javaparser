@@ -22,6 +22,7 @@
 package com.github.javaparser.symbolsolver.javaparsermodel.declarators;
 
 import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration;
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserSymbolDeclaration;
@@ -47,9 +48,12 @@ public class VariableSymbolDeclarator extends AbstractSymbolDeclarator<VariableD
 
     @Override
     public List<ResolvedValueDeclaration> getSymbolDeclarations() {
-        return wrappedNode.getVariables().stream()
-                .map(v -> JavaParserSymbolDeclaration.localVar(v, typeSolver))
-                .collect(Collectors.toCollection(LinkedList::new));
+        LinkedList<ResolvedValueDeclaration> resolvedValueDeclarations = new LinkedList<>();
+        for (VariableDeclarator v : wrappedNode.getVariables()) {
+            JavaParserSymbolDeclaration javaParserSymbolDeclaration = JavaParserSymbolDeclaration.localVar(v, typeSolver);
+            resolvedValueDeclarations.add(javaParserSymbolDeclaration);
+        }
+        return resolvedValueDeclarations;
     }
 
 }

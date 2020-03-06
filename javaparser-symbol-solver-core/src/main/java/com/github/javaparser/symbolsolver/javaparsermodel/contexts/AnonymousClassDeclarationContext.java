@@ -24,6 +24,7 @@ package com.github.javaparser.symbolsolver.javaparsermodel.contexts;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithTypeArguments;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration;
@@ -41,6 +42,7 @@ import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionClassDeclara
 import com.github.javaparser.symbolsolver.resolution.MethodResolutionLogic;
 import com.google.common.base.Preconditions;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -63,14 +65,16 @@ public class AnonymousClassDeclarationContext extends AbstractJavaParserContext<
   public SymbolReference<ResolvedMethodDeclaration> solveMethod(String name,
                                                                 List<ResolvedType> argumentsTypes,
                                                                 boolean staticOnly) {
-    List<ResolvedMethodDeclaration> candidateMethods =
-        myDeclaration
-            .getDeclaredMethods()
-            .stream()
-            .filter(m -> m.getName().equals(name) && (!staticOnly || m.isStatic()))
-            .collect(Collectors.toList());
+      List<ResolvedMethodDeclaration> candidateMethods =
+              new ArrayList<>();
+      for (ResolvedMethodDeclaration m : myDeclaration
+              .getDeclaredMethods()) {
+          if (m.getName().equals(name) && (!staticOnly || m.isStatic())) {
+              candidateMethods.add(m);
+          }
+      }
 
-    if (!Object.class.getCanonicalName().equals(myDeclaration.getQualifiedName())) {
+      if (!Object.class.getCanonicalName().equals(myDeclaration.getQualifiedName())) {
       for (ResolvedReferenceType ancestor : myDeclaration.getAncestors()) {
         SymbolReference<ResolvedMethodDeclaration> res =
             MethodResolutionLogic.solveMethodInType(ancestor.getTypeDeclaration(),
@@ -148,16 +152,20 @@ public class AnonymousClassDeclarationContext extends AbstractJavaParserContext<
       return recursiveMatch.get();
     }
 
-    Optional<SymbolReference<ResolvedTypeDeclaration>> typeArgumentsMatch =
-        wrappedNode
-            .getTypeArguments()
-            .map(nodes ->
-                     ((NodeWithTypeArguments<?>) nodes).getTypeArguments()
-                                                       .orElse(new NodeList<>()))
-            .orElse(new NodeList<>())
-            .stream()
-            .filter(type -> type.toString().equals(name))
-            .findFirst()
+      Optional<Type> found = Optional.empty();
+      for (Type type : wrappedNode
+              .getTypeArguments()
+              .map(nodes ->
+                      ((NodeWithTypeArguments<?>) nodes).getTypeArguments()
+                              .orElse(new NodeList<>()))
+              .orElse(new NodeList<>())) {
+          if (type.toString().equals(name)) {
+              found = Optional.of(type);
+              break;
+          }
+      }
+      Optional<SymbolReference<ResolvedTypeDeclaration>> typeArgumentsMatch =
+        found
             .map(matchingType ->
                      SymbolReference.solved(
                          new JavaParserTypeParameter(new TypeParameter(matchingType.toString()),

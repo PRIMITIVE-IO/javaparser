@@ -31,6 +31,8 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -85,7 +87,12 @@ public class ReflectionConstructorDeclaration implements ResolvedConstructorDecl
 
     @Override
     public List<ResolvedTypeParameterDeclaration> getTypeParameters() {
-        return Arrays.stream(constructor.getTypeParameters()).map((refTp) -> new ReflectionTypeParameter(refTp, false, typeSolver)).collect(Collectors.toList());
+        List<ResolvedTypeParameterDeclaration> list = new ArrayList<>();
+        for (TypeVariable<? extends Constructor<?>> refTp : constructor.getTypeParameters()) {
+            ReflectionTypeParameter reflectionTypeParameter = new ReflectionTypeParameter(refTp, false, typeSolver);
+            list.add(reflectionTypeParameter);
+        }
+        return list;
     }
 
     @Override

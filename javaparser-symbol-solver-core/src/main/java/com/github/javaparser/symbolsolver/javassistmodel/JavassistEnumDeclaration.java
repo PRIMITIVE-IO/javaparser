@@ -128,14 +128,25 @@ public class JavassistEnumDeclaration extends AbstractTypeDeclaration
 
     @Override
     public ResolvedFieldDeclaration getField(String name) {
-        Optional<ResolvedFieldDeclaration> field = javassistTypeDeclarationAdapter.getDeclaredFields().stream().filter(f -> f.getName().equals(name)).findFirst();
+        Optional<ResolvedFieldDeclaration> field = Optional.empty();
+        for (ResolvedFieldDeclaration f : javassistTypeDeclarationAdapter.getDeclaredFields()) {
+            if (f.getName().equals(name)) {
+                field = Optional.of(f);
+                break;
+            }
+        }
 
         return field.orElseThrow(() -> new RuntimeException("Field " + name + " does not exist in " + ctClass.getName() + "."));
     }
 
     @Override
     public boolean hasField(String name) {
-        return javassistTypeDeclarationAdapter.getDeclaredFields().stream().anyMatch(f -> f.getName().equals(name));
+        for (ResolvedFieldDeclaration f : javassistTypeDeclarationAdapter.getDeclaredFields()) {
+            if (f.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -218,7 +229,12 @@ public class JavassistEnumDeclaration extends AbstractTypeDeclaration
             Get all internal types of the current class and get their corresponding ReferenceTypeDeclaration.
             Finally, return them in a Set.
              */
-            return Arrays.stream(ctClass.getDeclaredClasses()).map(itype -> JavassistFactory.toTypeDeclaration(itype, typeSolver)).collect(Collectors.toSet());
+            Set<ResolvedReferenceTypeDeclaration> set = new HashSet<>();
+            for (CtClass itype : ctClass.getDeclaredClasses()) {
+                ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = JavassistFactory.toTypeDeclaration(itype, typeSolver);
+                set.add(resolvedReferenceTypeDeclaration);
+            }
+            return set;
         } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -231,7 +247,13 @@ public class JavassistEnumDeclaration extends AbstractTypeDeclaration
         In case the name is composed of the internal type only, i.e. f.getName() returns B, it will also works.
          */
         Optional<ResolvedReferenceTypeDeclaration> type =
-                this.internalTypes().stream().filter(f -> f.getName().endsWith(name)).findFirst();
+                Optional.empty();
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().endsWith(name)) {
+                type = Optional.of(f);
+                break;
+            }
+        }
         return type.orElseThrow(() ->
                 new UnsolvedSymbolException("Internal type not found: " + name));
     }
@@ -242,7 +264,12 @@ public class JavassistEnumDeclaration extends AbstractTypeDeclaration
         The name of the ReferenceTypeDeclaration could be composed on the internal class and the outer class, e.g. A$B. That's why we search the internal type in the ending part.
         In case the name is composed of the internal type only, i.e. f.getName() returns B, it will also works.
          */
-        return this.internalTypes().stream().anyMatch(f -> f.getName().endsWith(name));
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().endsWith(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public SymbolReference<? extends ResolvedValueDeclaration> solveSymbol(String name, TypeSolver typeSolver) {
@@ -278,10 +305,14 @@ public class JavassistEnumDeclaration extends AbstractTypeDeclaration
 
     @Override
     public List<ResolvedEnumConstantDeclaration> getEnumConstants() {
-        return Arrays.stream(ctClass.getFields())
-                .filter(f -> (f.getFieldInfo2().getAccessFlags() & AccessFlag.ENUM) != 0)
-                .map(f -> new JavassistEnumConstantDeclaration(f, typeSolver))
-                .collect(Collectors.toList());
+        List<ResolvedEnumConstantDeclaration> list = new ArrayList<>();
+        for (CtField f : ctClass.getFields()) {
+            if ((f.getFieldInfo2().getAccessFlags() & AccessFlag.ENUM) != 0) {
+                JavassistEnumConstantDeclaration javassistEnumConstantDeclaration = new JavassistEnumConstantDeclaration(f, typeSolver);
+                list.add(javassistEnumConstantDeclaration);
+            }
+        }
+        return list;
     }
 
     @Override

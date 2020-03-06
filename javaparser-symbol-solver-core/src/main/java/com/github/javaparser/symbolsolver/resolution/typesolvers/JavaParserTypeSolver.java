@@ -178,14 +178,13 @@ public class JavaParserTypeSolver implements TypeSolver {
                 List<CompilationUnit> units = new ArrayList<>();
                 if (Files.exists(srcDirectory)) {
                     try (DirectoryStream<Path> srcDirectoryStream = Files.newDirectoryStream(srcDirectory)) {
-                        srcDirectoryStream
-                                .forEach(file -> {
-                                    if (file.getFileName().toString().toLowerCase().endsWith(".java")) {
-                                        parse(file).ifPresent(units::add);
-                                    } else if (recursively && file.toFile().isDirectory()) {
-                                        units.addAll(parseDirectoryRecursively(file));
-                                    }
-                                });
+                        for (Path file : srcDirectoryStream) {
+                            if (file.getFileName().toString().toLowerCase().endsWith(".java")) {
+                                parse(file).ifPresent(units::add);
+                            } else if (recursively && file.toFile().isDirectory()) {
+                                units.addAll(parseDirectoryRecursively(file));
+                            }
+                        }
                     }
                 }
                 return units;

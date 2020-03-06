@@ -54,7 +54,12 @@ public class TypeHelper {
         }
         if (type instanceof ResolvedReferenceType) {
             ResolvedReferenceType referenceType = (ResolvedReferenceType) type;
-            return referenceType.typeParametersValues().stream().allMatch(it -> isProperType(it));
+            for (ResolvedType it : referenceType.typeParametersValues()) {
+                if (!isProperType(it)) {
+                    return false;
+                }
+            }
+            return true;
         }
         if (type instanceof ResolvedWildcard) {
             ResolvedWildcard wildcard = (ResolvedWildcard)type;
@@ -158,7 +163,12 @@ public class TypeHelper {
         if (!referenceType.isReferenceType()) {
             return false;
         }
-        return Arrays.stream(ResolvedPrimitiveType.values()).anyMatch(pt -> referenceType.asReferenceType().getQualifiedName().equals(pt.getBoxTypeQName()));
+        for (ResolvedPrimitiveType pt : ResolvedPrimitiveType.values()) {
+            if (referenceType.asReferenceType().getQualifiedName().equals(pt.getBoxTypeQName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static ResolvedType toUnboxedType(ResolvedReferenceType referenceType) {
@@ -170,7 +180,13 @@ public class TypeHelper {
     }
 
     private static boolean areCompatibleThroughWideningReferenceConversion(ResolvedType s, ResolvedType t) {
-        Optional<ResolvedPrimitiveType> correspondingPrimitiveTypeForS = Arrays.stream(ResolvedPrimitiveType.values()).filter(pt -> pt.getBoxTypeQName().equals(s.asReferenceType().getQualifiedName())).findFirst();
+        Optional<ResolvedPrimitiveType> correspondingPrimitiveTypeForS = Optional.empty();
+        for (ResolvedPrimitiveType pt : ResolvedPrimitiveType.values()) {
+            if (pt.getBoxTypeQName().equals(s.asReferenceType().getQualifiedName())) {
+                correspondingPrimitiveTypeForS = Optional.of(pt);
+                break;
+            }
+        }
         if (!correspondingPrimitiveTypeForS.isPresent()) {
             return false;
         }
@@ -218,7 +234,10 @@ public class TypeHelper {
         // If k = 1, then the lub is the type itself: lub(U) = U.
 
         if (types.size() == 1) {
-            return types.stream().findFirst().get();
+            for (ResolvedType type : types) {
+                return Optional.of(type).get();
+            }
+            return Optional.<ResolvedType>empty().get();
         }
 
         //
@@ -315,8 +334,13 @@ public class TypeHelper {
         //
         boolean used18_5_3 = false;
 
-        boolean wildcardParameterized = T.asReferenceType().typeParametersValues().stream()
-                .anyMatch(tp -> tp.isWildcard());
+        boolean wildcardParameterized = false;
+        for (ResolvedType tp : T.asReferenceType().typeParametersValues()) {
+            if (tp.isWildcard()) {
+                wildcardParameterized = true;
+                break;
+            }
+        }
         if (wildcardParameterized) {
             // - If T is a wildcard-parameterized functional interface type and the lambda expression is explicitly typed,
             //   then the ground target type is inferred as described in §18.5.3.

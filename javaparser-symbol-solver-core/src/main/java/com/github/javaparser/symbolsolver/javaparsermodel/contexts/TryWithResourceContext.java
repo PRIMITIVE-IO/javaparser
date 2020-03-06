@@ -36,10 +36,7 @@ import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.model.resolution.Value;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.javaparser.symbolsolver.javaparser.Navigator.demandParentNode;
@@ -100,11 +97,15 @@ public class TryWithResourceContext extends AbstractJavaParserContext<TryStmt> {
         NodeList<Expression> resources = wrappedNode.getResources();
         for (int i=0;i<resources.size();i++) {
             if (child == resources.get(i)) {
-                return resources.subList(0, i).stream()
-                        .map(e -> e instanceof VariableDeclarationExpr ? ((VariableDeclarationExpr) e).getVariables()
-                                : Collections.<VariableDeclarator>emptyList())
-                        .flatMap(List::stream)
-                        .collect(Collectors.toList());
+                List<VariableDeclarator> list = new ArrayList<>();
+                for (Expression e : resources.subList(0, i)) {
+                    List<VariableDeclarator> variableDeclarators = e instanceof VariableDeclarationExpr ? ((VariableDeclarationExpr) e).getVariables()
+                            : Collections.emptyList();
+                    for (VariableDeclarator variableDeclarator : variableDeclarators) {
+                        list.add(variableDeclarator);
+                    }
+                }
+                return list;
             }
         }
         if (child == wrappedNode.getTryBlock()) {

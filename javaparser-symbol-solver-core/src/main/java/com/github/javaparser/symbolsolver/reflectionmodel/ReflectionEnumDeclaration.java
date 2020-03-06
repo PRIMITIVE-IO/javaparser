@@ -207,17 +207,24 @@ public class ReflectionEnumDeclaration extends AbstractTypeDeclaration
 
   @Override
   public List<ResolvedEnumConstantDeclaration> getEnumConstants() {
-      return Arrays.stream(clazz.getFields())
-              .filter(Field::isEnumConstant)
-              .map(c -> new ReflectionEnumConstantDeclaration(c, typeSolver))
-              .collect(Collectors.toList());
+      List<ResolvedEnumConstantDeclaration> list = new ArrayList<>();
+      for (Field c : clazz.getFields()) {
+          if (c.isEnumConstant()) {
+              ReflectionEnumConstantDeclaration reflectionEnumConstantDeclaration = new ReflectionEnumConstantDeclaration(c, typeSolver);
+              list.add(reflectionEnumConstantDeclaration);
+          }
+      }
+      return list;
   }
 
   @Override
   public Set<ResolvedReferenceTypeDeclaration> internalTypes() {
-    return Arrays.stream(this.clazz.getDeclaredClasses())
-            .map(ic -> ReflectionFactory.typeDeclarationFor(ic, typeSolver))
-            .collect(Collectors.toSet());
+      Set<ResolvedReferenceTypeDeclaration> set = new HashSet<>();
+      for (Class<?> ic : this.clazz.getDeclaredClasses()) {
+          ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = ReflectionFactory.typeDeclarationFor(ic, typeSolver);
+          set.add(resolvedReferenceTypeDeclaration);
+      }
+      return set;
   }
 
   @Override

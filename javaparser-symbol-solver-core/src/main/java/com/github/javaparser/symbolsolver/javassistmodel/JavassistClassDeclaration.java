@@ -329,15 +329,21 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration implemen
     public List<ResolvedReferenceType> getInterfaces() {
         try {
             if (ctClass.getGenericSignature() == null) {
-                return Arrays.stream(ctClass.getClassFile().getInterfaces())
-                        .map(i -> typeSolver.solveType(JavassistUtils.internalNameToCanonicalName(i)))
-                        .map(i -> new ReferenceTypeImpl(i, typeSolver))
-                        .collect(Collectors.toList());
+                List<ResolvedReferenceType> list = new ArrayList<>();
+                for (String i : ctClass.getClassFile().getInterfaces()) {
+                    ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = typeSolver.solveType(JavassistUtils.internalNameToCanonicalName(i));
+                    ReferenceTypeImpl referenceType = new ReferenceTypeImpl(resolvedReferenceTypeDeclaration, typeSolver);
+                    list.add(referenceType);
+                }
+                return list;
             } else {
                 SignatureAttribute.ClassSignature classSignature = SignatureAttribute.toClassSignature(ctClass.getGenericSignature());
-                return Arrays.stream(classSignature.getInterfaces())
-                        .map(i -> JavassistUtils.signatureTypeToType(i, typeSolver, this).asReferenceType())
-                        .collect(Collectors.toList());
+                List<ResolvedReferenceType> list = new ArrayList<>();
+                for (SignatureAttribute.ClassType i : classSignature.getInterfaces()) {
+                    ResolvedReferenceType resolvedReferenceType = JavassistUtils.signatureTypeToType(i, typeSolver, this).asReferenceType();
+                    list.add(resolvedReferenceType);
+                }
+                return list;
             }
         } catch (BadBytecode e) {
             throw new RuntimeException(e);
@@ -381,7 +387,12 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration implemen
             Get all internal types of the current class and get their corresponding ReferenceTypeDeclaration.
             Finally, return them in a Set.
              */
-            return Arrays.stream(ctClass.getDeclaredClasses()).map(itype -> JavassistFactory.toTypeDeclaration(itype, typeSolver)).collect(Collectors.toSet());
+            Set<ResolvedReferenceTypeDeclaration> set = new HashSet<>();
+            for (CtClass itype : ctClass.getDeclaredClasses()) {
+                ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = JavassistFactory.toTypeDeclaration(itype, typeSolver);
+                set.add(resolvedReferenceTypeDeclaration);
+            }
+            return set;
         } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -394,7 +405,13 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration implemen
         In case the name is composed of the internal type only, i.e. f.getName() returns B, it will also works.
          */
         Optional<ResolvedReferenceTypeDeclaration> type =
-                this.internalTypes().stream().filter(f -> f.getName().endsWith(name)).findFirst();
+                Optional.empty();
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().endsWith(name)) {
+                type = Optional.of(f);
+                break;
+            }
+        }
         return type.orElseThrow(() ->
                 new UnsolvedSymbolException("Internal type not found: " + name));
     }
@@ -405,7 +422,12 @@ public class JavassistClassDeclaration extends AbstractClassDeclaration implemen
         The name of the ReferenceTypeDeclaration could be composed of the internal class and the outer class, e.g. A$B. That's why we search the internal type in the ending part.
         In case the name is composed of the internal type only, i.e. f.getName() returns B, it will also works.
          */
-        return this.internalTypes().stream().anyMatch(f -> f.getName().endsWith(name));
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().endsWith(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

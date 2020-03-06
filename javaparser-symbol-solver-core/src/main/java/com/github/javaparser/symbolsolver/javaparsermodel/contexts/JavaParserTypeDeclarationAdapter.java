@@ -38,6 +38,7 @@ import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionClassDeclara
 import com.github.javaparser.symbolsolver.resolution.ConstructorResolutionLogic;
 import com.github.javaparser.symbolsolver.resolution.MethodResolutionLogic;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -131,19 +132,26 @@ public class JavaParserTypeDeclarationAdapter {
     }
 
     public SymbolReference<ResolvedMethodDeclaration> solveMethod(String name, List<ResolvedType> argumentsTypes, boolean staticOnly) {
-        List<ResolvedMethodDeclaration> candidateMethods = typeDeclaration.getDeclaredMethods().stream()
-                .filter(m -> m.getName().equals(name))
-                .filter(m -> !staticOnly || m.isStatic())
-                .collect(Collectors.toList());
+        List<ResolvedMethodDeclaration> candidateMethods = new ArrayList<>();
+        for (ResolvedMethodDeclaration resolvedMethodDeclaration : typeDeclaration.getDeclaredMethods()) {
+            if (resolvedMethodDeclaration.getName().equals(name)) {
+                if (!staticOnly || resolvedMethodDeclaration.isStatic()) {
+                    candidateMethods.add(resolvedMethodDeclaration);
+                }
+            }
+        }
         // We want to avoid infinite recursion in case of Object having Object as ancestor
         if (!Object.class.getCanonicalName().equals(typeDeclaration.getQualifiedName())) {
             for (ResolvedReferenceType ancestor : typeDeclaration.getAncestors(true)) {
                 // Avoid recursion on self
                 if (typeDeclaration != ancestor.getTypeDeclaration()) {
-                    candidateMethods.addAll(ancestor.getAllMethodsVisibleToInheritors()
-                            .stream()
-                            .filter(m -> m.getName().equals(name))
-                            .collect(Collectors.toList()));
+                    List<ResolvedMethodDeclaration> list = new ArrayList<>();
+                    for (ResolvedMethodDeclaration m : ancestor.getAllMethodsVisibleToInheritors()) {
+                        if (m.getName().equals(name)) {
+                            list.add(m);
+                        }
+                    }
+                    candidateMethods.addAll(list);
                     SymbolReference<ResolvedMethodDeclaration> res = MethodResolutionLogic
                             .solveMethodInType(ancestor.getTypeDeclaration(), name, argumentsTypes, staticOnly);
                     // consider methods from superclasses and only default methods from interfaces :

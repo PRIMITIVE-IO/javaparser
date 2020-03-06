@@ -42,6 +42,7 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.MethodResolutionLogic;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -272,11 +273,14 @@ public class CompilationUnitContext extends AbstractJavaParserContext<Compilatio
                     String importString = importDecl.getNameAsString();
 
                     if (this.wrappedNode.getPackageDeclaration().isPresent()
-                        && this.wrappedNode.getPackageDeclaration().get().getName().getIdentifier().equals(packageName(importString))
-                        && this.wrappedNode.getTypes().stream().anyMatch(it -> it.getName().getIdentifier().equals(toSimpleName(importString)))) {
+                            && this.wrappedNode.getPackageDeclaration().get().getName().getIdentifier().equals(packageName(importString))) {
                         // We are using a static import on a type defined in this file. It means the value was not found at
                         // a lower level so this will fail
-                        return SymbolReference.unsolved(ResolvedMethodDeclaration.class);
+                        for (TypeDeclaration<?> it : this.wrappedNode.getTypes()) {
+                            if (it.getName().getIdentifier().equals(toSimpleName(importString))) {
+                                return SymbolReference.unsolved(ResolvedMethodDeclaration.class);
+                            }
+                        }
                     }
 
                     ResolvedTypeDeclaration ref = typeSolver.solveType(importString);
@@ -313,10 +317,15 @@ public class CompilationUnitContext extends AbstractJavaParserContext<Compilatio
                 Name typeNameAsNode = importDeclaration.isAsterisk() ? importDeclaration.getName() : importDeclaration.getName().getQualifier().get();
                 String typeName = typeNameAsNode.asString();
                 ResolvedReferenceTypeDeclaration typeDeclaration = typeSolver.solveType(typeName);
-                res.addAll(typeDeclaration.getAllFields().stream()
-                               .filter(f -> f.isStatic())
-                               .filter(f -> importDeclaration.isAsterisk() || importDeclaration.getName().getIdentifier().equals(f.getName()))
-                               .collect(Collectors.toList()));
+                List<ResolvedFieldDeclaration> list = new ArrayList<>();
+                for (ResolvedFieldDeclaration f : typeDeclaration.getAllFields()) {
+                    if (f.isStatic()) {
+                        if (importDeclaration.isAsterisk() || importDeclaration.getName().getIdentifier().equals(f.getName())) {
+                            list.add(f);
+                        }
+                    }
+                }
+                res.addAll(list);
             }
         }
         return res;

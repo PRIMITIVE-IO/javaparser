@@ -215,7 +215,13 @@ public final class Navigator {
         }
 
         final String typeName = getOuterTypeName(qualifiedName);
-        Optional<TypeDeclaration<?>> type = cu.getTypes().stream().filter((t) -> t.getName().getId().equals(typeName)).findFirst();
+        Optional<TypeDeclaration<?>> type = Optional.empty();
+        for (TypeDeclaration<?> t : cu.getTypes()) {
+            if (t.getName().getId().equals(typeName)) {
+                type = Optional.of(t);
+                break;
+            }
+        }
 
         final String innerTypeName = getInnerTypeName(qualifiedName);
         if (type.isPresent() && !innerTypeName.isEmpty()) {

@@ -22,6 +22,7 @@
 package com.github.javaparser.symbolsolver.resolution.typeinference;
 
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ExpressionStmt;
@@ -145,7 +146,12 @@ public class ExpressionHelper {
     }
 
     public static boolean isExplicitlyTyped(LambdaExpr lambdaExpr) {
-        return lambdaExpr.getParameters().stream().allMatch(p -> !(p.getType() instanceof UnknownType));
+        for (Parameter p : lambdaExpr.getParameters()) {
+            if (p.getType() instanceof UnknownType) {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static List<Expression> getResultExpressions(BlockStmt blockStmt) {

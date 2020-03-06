@@ -101,7 +101,13 @@ public class FieldAccessContext extends AbstractJavaParserContext<FieldAccessExp
         Collection<ResolvedReferenceTypeDeclaration> rrtds = findTypeDeclarations(Optional.of(wrappedNode.getScope()));
         for (ResolvedReferenceTypeDeclaration rrtd : rrtds) {
             if (rrtd.isEnum()) {
-                Optional<ResolvedEnumConstantDeclaration> enumConstant = rrtd.asEnum().getEnumConstants().stream().filter(c -> c.getName().equals(name)).findFirst();
+                Optional<ResolvedEnumConstantDeclaration> enumConstant = Optional.empty();
+                for (ResolvedEnumConstantDeclaration c : rrtd.asEnum().getEnumConstants()) {
+                    if (c.getName().equals(name)) {
+                        enumConstant = Optional.of(c);
+                        break;
+                    }
+                }
                 if (enumConstant.isPresent()) {
                     return SymbolReference.solved(enumConstant.get());
                 }

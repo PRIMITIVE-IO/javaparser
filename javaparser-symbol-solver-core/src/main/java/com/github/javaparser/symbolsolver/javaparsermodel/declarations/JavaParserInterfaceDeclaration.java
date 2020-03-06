@@ -26,6 +26,8 @@ import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.*;
@@ -191,37 +193,39 @@ public class JavaParserInterfaceDeclaration extends AbstractTypeDeclaration
     @Override
     public List<ResolvedFieldDeclaration> getAllFields() {
         List<ResolvedFieldDeclaration> fields = javaParserTypeAdapter.getFieldsForDeclaredVariables();
-        
-        getAncestors().forEach(ancestor -> ancestor.getTypeDeclaration().getAllFields().forEach(f -> {
-            fields.add(new ResolvedFieldDeclaration() {
-                
-                @Override
-                public AccessSpecifier accessSpecifier() {
-                    return f.accessSpecifier();
-                }
-                
-                @Override
-                public String getName() {
-                    return f.getName();
-                }
-                
-                @Override
-                public ResolvedType getType() {
-                    return ancestor.useThisTypeParametersOnTheGivenType(f.getType());
-                }
-                
-                @Override
-                public boolean isStatic() {
-                    return f.isStatic();
-                }
-                
-                @Override
-                public ResolvedTypeDeclaration declaringType() {
-                    return f.declaringType();
-                }
-            });
-        }));
-        
+
+        for (ResolvedReferenceType ancestor : getAncestors()) {
+            for (ResolvedFieldDeclaration f : ancestor.getTypeDeclaration().getAllFields()) {
+                fields.add(new ResolvedFieldDeclaration() {
+
+                    @Override
+                    public AccessSpecifier accessSpecifier() {
+                        return f.accessSpecifier();
+                    }
+
+                    @Override
+                    public String getName() {
+                        return f.getName();
+                    }
+
+                    @Override
+                    public ResolvedType getType() {
+                        return ancestor.useThisTypeParametersOnTheGivenType(f.getType());
+                    }
+
+                    @Override
+                    public boolean isStatic() {
+                        return f.isStatic();
+                    }
+
+                    @Override
+                    public ResolvedTypeDeclaration declaringType() {
+                        return f.declaringType();
+                    }
+                });
+            }
+        }
+
         return fields;
     }
 
@@ -306,9 +310,12 @@ public class JavaParserInterfaceDeclaration extends AbstractTypeDeclaration
         if (this.wrappedNode.getTypeParameters() == null) {
             return Collections.emptyList();
         } else {
-            return this.wrappedNode.getTypeParameters().stream().map(
-                    (tp) -> new JavaParserTypeParameter(tp, typeSolver)
-            ).collect(Collectors.toList());
+            List<ResolvedTypeParameterDeclaration> list = new ArrayList<>();
+            for (TypeParameter tp : this.wrappedNode.getTypeParameters()) {
+                JavaParserTypeParameter javaParserTypeParameter = new JavaParserTypeParameter(tp, typeSolver);
+                list.add(javaParserTypeParameter);
+            }
+            return list;
         }
     }
 
@@ -375,9 +382,11 @@ public class JavaParserInterfaceDeclaration extends AbstractTypeDeclaration
         if (!classOrInterfaceType.getTypeArguments().isPresent()) {
             return new ReferenceTypeImpl(ref.getCorrespondingDeclaration().asReferenceType(), typeSolver);
         }
-        List<ResolvedType> superClassTypeParameters = classOrInterfaceType.getTypeArguments().get()
-                .stream().map(ta -> new LazyType(v -> JavaParserFacade.get(typeSolver).convert(ta, ta)))
-                .collect(Collectors.toList());
+        List<ResolvedType> superClassTypeParameters = new ArrayList<>();
+        for (Type ta : classOrInterfaceType.getTypeArguments().get()) {
+            LazyType lazyType = new LazyType(v -> JavaParserFacade.get(typeSolver).convert(ta, ta));
+            superClassTypeParameters.add(lazyType);
+        }
         return new ReferenceTypeImpl(ref.getCorrespondingDeclaration().asReferenceType(), superClassTypeParameters, typeSolver);
     }
 }

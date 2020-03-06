@@ -162,7 +162,12 @@ public class ConstructorResolutionLogic {
 
     public static SymbolReference<ResolvedConstructorDeclaration> findMostApplicable(
             List<ResolvedConstructorDeclaration> constructors, List<ResolvedType> argumentsTypes, TypeSolver typeSolver, boolean wildcardTolerance) {
-        List<ResolvedConstructorDeclaration> applicableConstructors = constructors.stream().filter((m) -> isApplicable(m, argumentsTypes, typeSolver, wildcardTolerance)).collect(Collectors.toList());
+        List<ResolvedConstructorDeclaration> applicableConstructors = new ArrayList<>();
+        for (ResolvedConstructorDeclaration m : constructors) {
+            if (isApplicable(m, argumentsTypes, typeSolver, wildcardTolerance)) {
+                applicableConstructors.add(m);
+            }
+        }
         if (applicableConstructors.isEmpty()) {
             return SymbolReference.unsolved(ResolvedConstructorDeclaration.class);
         }

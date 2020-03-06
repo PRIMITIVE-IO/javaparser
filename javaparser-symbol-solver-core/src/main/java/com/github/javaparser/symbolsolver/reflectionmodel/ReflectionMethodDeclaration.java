@@ -36,6 +36,8 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.TypeVariable;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -118,7 +120,12 @@ public class ReflectionMethodDeclaration implements ResolvedMethodDeclaration, T
 
     @Override
     public List<ResolvedTypeParameterDeclaration> getTypeParameters() {
-        return Arrays.stream(method.getTypeParameters()).map((refTp) -> new ReflectionTypeParameter(refTp, false, typeSolver)).collect(Collectors.toList());
+        List<ResolvedTypeParameterDeclaration> list = new ArrayList<>();
+        for (TypeVariable<Method> refTp : method.getTypeParameters()) {
+            ReflectionTypeParameter reflectionTypeParameter = new ReflectionTypeParameter(refTp, false, typeSolver);
+            list.add(reflectionTypeParameter);
+        }
+        return list;
     }
 
     public MethodUsage resolveTypeVariables(Context context, List<ResolvedType> parameterTypes) {

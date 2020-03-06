@@ -24,6 +24,7 @@ package com.github.javaparser.symbolsolver.javaparsermodel.declarations;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations;
 import com.github.javaparser.ast.nodeTypes.NodeWithMembers;
@@ -36,6 +37,7 @@ import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.google.common.collect.ImmutableList;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -116,9 +118,11 @@ class AstResolutionUtils {
             NodeWithMembers<?> wrappedNode,
             TypeSolver typeSolver,
             N container) {
-        List<ResolvedConstructorDeclaration> declared = wrappedNode.getConstructors().stream()
-                .map(c -> new JavaParserConstructorDeclaration<N>(container, c, typeSolver))
-                .collect(Collectors.toList());
+        List<ResolvedConstructorDeclaration> declared = new ArrayList<>();
+        for (ConstructorDeclaration c : wrappedNode.getConstructors()) {
+            JavaParserConstructorDeclaration<N> nJavaParserConstructorDeclaration = new JavaParserConstructorDeclaration<>(container, c, typeSolver);
+            declared.add(nJavaParserConstructorDeclaration);
+        }
         if (declared.isEmpty()) {
             // If there are no constructors insert the default constructor
             return ImmutableList.of(new DefaultConstructorDeclaration<N>(container));

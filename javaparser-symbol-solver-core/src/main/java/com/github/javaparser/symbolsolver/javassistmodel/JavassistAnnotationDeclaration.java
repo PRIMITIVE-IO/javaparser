@@ -28,11 +28,9 @@ import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.logic.AbstractTypeDeclaration;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import javassist.CtClass;
+import javassist.CtMethod;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -144,9 +142,12 @@ public class JavassistAnnotationDeclaration extends AbstractTypeDeclaration impl
 
     @Override
     public List<ResolvedAnnotationMemberDeclaration> getAnnotationMembers() {
-        return Stream.of(ctClass.getDeclaredMethods())
-                .map(m -> new JavassistAnnotationMemberDeclaration(m, typeSolver))
-                .collect(Collectors.toList());
+        List<ResolvedAnnotationMemberDeclaration> list = new ArrayList<>();
+        for (CtMethod m : ctClass.getDeclaredMethods()) {
+            JavassistAnnotationMemberDeclaration javassistAnnotationMemberDeclaration = new JavassistAnnotationMemberDeclaration(m, typeSolver);
+            list.add(javassistAnnotationMemberDeclaration);
+        }
+        return list;
     }
 
     @Override

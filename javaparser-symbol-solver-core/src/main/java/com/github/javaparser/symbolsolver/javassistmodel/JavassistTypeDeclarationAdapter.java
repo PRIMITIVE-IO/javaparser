@@ -23,8 +23,7 @@ package com.github.javaparser.symbolsolver.javassistmodel;
 
 import com.github.javaparser.resolution.declarations.*;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
-import javassist.CtClass;
-import javassist.NotFoundException;
+import javassist.*;
 import javassist.bytecode.AccessFlag;
 import javassist.bytecode.BadBytecode;
 import javassist.bytecode.SignatureAttribute;
@@ -46,16 +45,26 @@ public class JavassistTypeDeclarationAdapter {
   }
 
   public Set<ResolvedMethodDeclaration> getDeclaredMethods() {
-    return Arrays.stream(ctClass.getDeclaredMethods())
-        .filter(m -> ((m.getMethodInfo().getAccessFlags() & AccessFlag.BRIDGE) == 0)
-                  && ((m.getMethodInfo().getAccessFlags() & AccessFlag.SYNTHETIC) == 0))
-        .map(m -> new JavassistMethodDeclaration(m, typeSolver)).collect(Collectors.toSet());
+      Set<ResolvedMethodDeclaration> set = new HashSet<>();
+      for (CtMethod m : ctClass.getDeclaredMethods()) {
+          if (((m.getMethodInfo().getAccessFlags() & AccessFlag.BRIDGE) == 0)
+                  && ((m.getMethodInfo().getAccessFlags() & AccessFlag.SYNTHETIC) == 0)) {
+              JavassistMethodDeclaration javassistMethodDeclaration = new JavassistMethodDeclaration(m, typeSolver);
+              set.add(javassistMethodDeclaration);
+          }
+      }
+      return set;
   }
 
   public List<ResolvedConstructorDeclaration> getConstructors() {
-    return Arrays.stream(ctClass.getConstructors())
-        .filter(m -> (m.getMethodInfo().getAccessFlags() & AccessFlag.SYNTHETIC) == 0)
-        .map(m -> new JavassistConstructorDeclaration(m, typeSolver)).collect(Collectors.toList());
+      List<ResolvedConstructorDeclaration> list = new ArrayList<>();
+      for (CtConstructor m : ctClass.getConstructors()) {
+          if ((m.getMethodInfo().getAccessFlags() & AccessFlag.SYNTHETIC) == 0) {
+              JavassistConstructorDeclaration javassistConstructorDeclaration = new JavassistConstructorDeclaration(m, typeSolver);
+              list.add(javassistConstructorDeclaration);
+          }
+      }
+      return list;
   }
 
   public List<ResolvedFieldDeclaration> getDeclaredFields() {
@@ -66,9 +75,10 @@ public class JavassistTypeDeclarationAdapter {
 
   private void collectDeclaredFields(CtClass ctClass, List<ResolvedFieldDeclaration> fieldDecls) {
     if (ctClass != null) {
-      Arrays.stream(ctClass.getDeclaredFields())
-          .forEach(f -> fieldDecls.add(new JavassistFieldDeclaration(f, typeSolver)));
-      try {
+        for (CtField f : ctClass.getDeclaredFields()) {
+            fieldDecls.add(new JavassistFieldDeclaration(f, typeSolver));
+        }
+        try {
         collectDeclaredFields(ctClass.getSuperclass(), fieldDecls);
       } catch (NotFoundException e) {
         // We'll stop here
@@ -83,9 +93,12 @@ public class JavassistTypeDeclarationAdapter {
       try {
         SignatureAttribute.ClassSignature classSignature =
             SignatureAttribute.toClassSignature(ctClass.getGenericSignature());
-        return Arrays.<SignatureAttribute.TypeParameter>stream(classSignature.getParameters())
-            .map((tp) -> new JavassistTypeParameter(tp, JavassistFactory.toTypeDeclaration(ctClass, typeSolver), typeSolver))
-            .collect(Collectors.toList());
+          List<ResolvedTypeParameterDeclaration> list = new ArrayList<>();
+          for (SignatureAttribute.TypeParameter tp : classSignature.getParameters()) {
+              JavassistTypeParameter javassistTypeParameter = new JavassistTypeParameter(tp, JavassistFactory.toTypeDeclaration(ctClass, typeSolver), typeSolver);
+              list.add(javassistTypeParameter);
+          }
+          return list;
       } catch (BadBytecode badBytecode) {
         throw new RuntimeException(badBytecode);
       }

@@ -23,10 +23,9 @@ package com.github.javaparser.symbolsolver.javaparsermodel.declarations;
 
 import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.body.BodyDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
 import com.github.javaparser.resolution.declarations.*;
@@ -213,12 +212,18 @@ public class JavaParserEnumDeclaration extends AbstractTypeDeclaration
     public List<ResolvedFieldDeclaration> getAllFields() {
         List<ResolvedFieldDeclaration> fields = javaParserTypeAdapter.getFieldsForDeclaredVariables();
 
-        this.getAncestors().forEach(a -> fields.addAll(a.getAllFieldsVisibleToInheritors()));
+        for (ResolvedReferenceType a : this.getAncestors()) {
+            fields.addAll(a.getAllFieldsVisibleToInheritors());
+        }
 
-        this.wrappedNode.getMembers().stream().filter(m -> m instanceof FieldDeclaration).forEach(m -> {
-                FieldDeclaration fd = (FieldDeclaration)m;
-                fd.getVariables().forEach(v -> fields.add(new JavaParserFieldDeclaration(v, typeSolver)));
-        });
+        for (BodyDeclaration<?> m : this.wrappedNode.getMembers()) {
+            if (m instanceof FieldDeclaration) {
+                FieldDeclaration fd = (FieldDeclaration) m;
+                for (VariableDeclarator v : fd.getVariables()) {
+                    fields.add(new JavaParserFieldDeclaration(v, typeSolver));
+                }
+            }
+        }
 
         return fields;
     }
@@ -257,9 +262,11 @@ public class JavaParserEnumDeclaration extends AbstractTypeDeclaration
         if (!classOrInterfaceType.getTypeArguments().isPresent()) {
             return new ReferenceTypeImpl(ref.getCorrespondingDeclaration().asReferenceType(), typeSolver);
         }
-        List<ResolvedType> superClassTypeParameters = classOrInterfaceType.getTypeArguments().get()
-                .stream().map(ta -> new LazyType(v -> JavaParserFacade.get(typeSolver).convert(ta, ta)))
-                .collect(Collectors.toList());
+        List<ResolvedType> superClassTypeParameters = new ArrayList<>();
+        for (Type ta : classOrInterfaceType.getTypeArguments().get()) {
+            LazyType lazyType = new LazyType(v -> JavaParserFacade.get(typeSolver).convert(ta, ta));
+            superClassTypeParameters.add(lazyType);
+        }
         return new ReferenceTypeImpl(ref.getCorrespondingDeclaration().asReferenceType(), superClassTypeParameters, typeSolver);
     }
 
@@ -300,9 +307,12 @@ public class JavaParserEnumDeclaration extends AbstractTypeDeclaration
 
     @Override
     public List<ResolvedEnumConstantDeclaration> getEnumConstants() {
-        return wrappedNode.getEntries().stream()
-                .map(entry -> new JavaParserEnumConstantDeclaration(entry, typeSolver))
-                .collect(Collectors.toList());
+        List<ResolvedEnumConstantDeclaration> list = new ArrayList<>();
+        for (EnumConstantDeclaration entry : wrappedNode.getEntries()) {
+            JavaParserEnumConstantDeclaration javaParserEnumConstantDeclaration = new JavaParserEnumConstantDeclaration(entry, typeSolver);
+            list.add(javaParserEnumConstantDeclaration);
+        }
+        return list;
     }
 
     // Needed by ContextHelper

@@ -148,10 +148,13 @@ public abstract class AbstractJavaParserContext<N extends Node> implements Conte
     ///
 
     protected Optional<Value> solveWithAsValue(SymbolDeclarator symbolDeclarator, String name) {
-        return symbolDeclarator.getSymbolDeclarations().stream()
-                .filter(d -> d.getName().equals(name))
-                .map(Value::from)
-                .findFirst();
+        for (ResolvedValueDeclaration d : symbolDeclarator.getSymbolDeclarations()) {
+            if (d.getName().equals(name)) {
+                Value from = Value.from(d);
+                return Optional.of(from);
+            }
+        }
+        return Optional.empty();
     }
 
     protected Collection<ResolvedReferenceTypeDeclaration> findTypeDeclarations(Optional<Expression> optScope) {

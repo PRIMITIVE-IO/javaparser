@@ -21,6 +21,7 @@
 
 package com.github.javaparser.symbolsolver.resolution.typeinference;
 
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.type.UnknownType;
 import com.github.javaparser.resolution.MethodUsage;
@@ -587,7 +588,12 @@ public class TypeInference {
     }
 
     private boolean isImplicitlyTyped(LambdaExpr lambdaExpr) {
-        return lambdaExpr.getParameters().stream().anyMatch(p -> p.getType() instanceof UnknownType);
+        for (Parameter p : lambdaExpr.getParameters()) {
+            if (p.getType() instanceof UnknownType) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private boolean isInexact(MethodReferenceExpr methodReferenceExpr) {

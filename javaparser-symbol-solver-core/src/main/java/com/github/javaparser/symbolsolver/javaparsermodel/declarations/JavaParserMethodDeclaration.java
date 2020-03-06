@@ -25,6 +25,7 @@ import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
+import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedParameterDeclaration;
@@ -38,6 +39,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFactory;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -131,7 +133,12 @@ public class JavaParserMethodDeclaration implements ResolvedMethodDeclaration, T
 
     @Override
     public List<ResolvedTypeParameterDeclaration> getTypeParameters() {
-        return this.wrappedNode.getTypeParameters().stream().map((astTp) -> new JavaParserTypeParameter(astTp, typeSolver)).collect(Collectors.toList());
+        List<ResolvedTypeParameterDeclaration> list = new ArrayList<>();
+        for (TypeParameter astTp : this.wrappedNode.getTypeParameters()) {
+            JavaParserTypeParameter javaParserTypeParameter = new JavaParserTypeParameter(astTp, typeSolver);
+            list.add(javaParserTypeParameter);
+        }
+        return list;
     }
 
     @Override

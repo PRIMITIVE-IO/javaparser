@@ -35,6 +35,7 @@ import com.github.javaparser.symbolsolver.logic.MethodResolutionCapability;
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -176,9 +177,12 @@ public class ReflectionAnnotationDeclaration extends AbstractTypeDeclaration imp
 
     @Override
     public Set<ResolvedReferenceTypeDeclaration> internalTypes() {
-        return Arrays.stream(this.clazz.getDeclaredClasses())
-            .map(ic -> ReflectionFactory.typeDeclarationFor(ic, typeSolver))
-            .collect(Collectors.toSet());
+        Set<ResolvedReferenceTypeDeclaration> set = new HashSet<>();
+        for (Class<?> ic : this.clazz.getDeclaredClasses()) {
+            ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = ReflectionFactory.typeDeclarationFor(ic, typeSolver);
+            set.add(resolvedReferenceTypeDeclaration);
+        }
+        return set;
     }
 
     @Override
@@ -188,9 +192,12 @@ public class ReflectionAnnotationDeclaration extends AbstractTypeDeclaration imp
 
     @Override
     public List<ResolvedAnnotationMemberDeclaration> getAnnotationMembers() {
-        return Stream.of(clazz.getDeclaredMethods())
-                       .map(m -> new ReflectionAnnotationMemberDeclaration(m, typeSolver))
-                       .collect(Collectors.toList());
+        List<ResolvedAnnotationMemberDeclaration> list = new ArrayList<>();
+        for (Method m : clazz.getDeclaredMethods()) {
+            ReflectionAnnotationMemberDeclaration reflectionAnnotationMemberDeclaration = new ReflectionAnnotationMemberDeclaration(m, typeSolver);
+            list.add(reflectionAnnotationMemberDeclaration);
+        }
+        return list;
     }
 
     @Override

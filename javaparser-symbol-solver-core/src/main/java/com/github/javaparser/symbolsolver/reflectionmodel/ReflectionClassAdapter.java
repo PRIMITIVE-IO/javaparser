@@ -32,9 +32,7 @@ import com.github.javaparser.symbolsolver.model.typesystem.NullType;
 import com.github.javaparser.symbolsolver.model.typesystem.ReferenceTypeImpl;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -60,9 +58,11 @@ class ReflectionClassAdapter {
         java.lang.reflect.Type superType = clazz.getGenericSuperclass();
         if (superType instanceof ParameterizedType) {
             ParameterizedType parameterizedType = (ParameterizedType) superType;
-            List<ResolvedType> typeParameters = Arrays.stream(parameterizedType.getActualTypeArguments())
-                    .map((t) -> ReflectionFactory.typeUsageFor(t, typeSolver))
-                    .collect(Collectors.toList());
+            List<ResolvedType> typeParameters = new ArrayList<>();
+            for (Type t : parameterizedType.getActualTypeArguments()) {
+                ResolvedType resolvedType = ReflectionFactory.typeUsageFor(t, typeSolver);
+                typeParameters.add(resolvedType);
+            }
             return new ReferenceTypeImpl(new ReflectionClassDeclaration(clazz.getSuperclass(), typeSolver), typeParameters, typeSolver);
         }
         return new ReferenceTypeImpl(new ReflectionClassDeclaration(clazz.getSuperclass(), typeSolver), typeSolver);
@@ -73,9 +73,11 @@ class ReflectionClassAdapter {
         for (java.lang.reflect.Type superInterface : clazz.getGenericInterfaces()) {
             if (superInterface instanceof ParameterizedType) {
                 ParameterizedType parameterizedType = (ParameterizedType) superInterface;
-                List<ResolvedType> typeParameters = Arrays.stream(parameterizedType.getActualTypeArguments())
-                        .map((t) -> ReflectionFactory.typeUsageFor(t, typeSolver))
-                        .collect(Collectors.toList());
+                List<ResolvedType> typeParameters = new ArrayList<>();
+                for (Type t : parameterizedType.getActualTypeArguments()) {
+                    ResolvedType resolvedType = ReflectionFactory.typeUsageFor(t, typeSolver);
+                    typeParameters.add(resolvedType);
+                }
                 interfaces.add(new ReferenceTypeImpl(new ReflectionInterfaceDeclaration((Class<?>) ((ParameterizedType) superInterface).getRawType(), typeSolver), typeParameters, typeSolver));
             } else {
                 interfaces.add(new ReferenceTypeImpl(new ReflectionInterfaceDeclaration((Class<?>) superInterface, typeSolver), typeSolver));
@@ -145,10 +147,14 @@ class ReflectionClassAdapter {
     }
 
     public Set<ResolvedMethodDeclaration> getDeclaredMethods() {
-        return Arrays.stream(clazz.getDeclaredMethods())
-                .filter(m -> !m.isSynthetic() && !m.isBridge())
-                .map(m -> new ReflectionMethodDeclaration(m, typeSolver))
-                .collect(Collectors.toSet());
+        Set<ResolvedMethodDeclaration> set = new HashSet<>();
+        for (Method m : clazz.getDeclaredMethods()) {
+            if (!m.isSynthetic() && !m.isBridge()) {
+                ReflectionMethodDeclaration reflectionMethodDeclaration = new ReflectionMethodDeclaration(m, typeSolver);
+                set.add(reflectionMethodDeclaration);
+            }
+        }
+        return set;
     }
 
     public List<ResolvedTypeParameterDeclaration> getTypeParameters() {
@@ -197,10 +203,14 @@ class ReflectionClassAdapter {
     }
 
     public List<ResolvedConstructorDeclaration> getConstructors() {
-        return Arrays.stream(clazz.getDeclaredConstructors())
-                .filter(m -> !m.isSynthetic())
-                .map(m -> new ReflectionConstructorDeclaration(m, typeSolver))
-                .collect(Collectors.toList());
+        List<ResolvedConstructorDeclaration> list = new ArrayList<>();
+        for (Constructor<?> m : clazz.getDeclaredConstructors()) {
+            if (!m.isSynthetic()) {
+                ReflectionConstructorDeclaration reflectionConstructorDeclaration = new ReflectionConstructorDeclaration(m, typeSolver);
+                list.add(reflectionConstructorDeclaration);
+            }
+        }
+        return list;
     }
     
     public Optional<ResolvedReferenceTypeDeclaration> containerType() {

@@ -78,8 +78,13 @@ public class JavassistInterfaceDeclaration extends AbstractTypeDeclaration
 
     @Override
     public List<ResolvedReferenceType> getInterfacesExtended() {
-        return Arrays.stream(ctClass.getClassFile().getInterfaces()).map(i -> typeSolver.solveType(i))
-                .map(i -> new ReferenceTypeImpl(i, typeSolver)).collect(Collectors.toList());
+        List<ResolvedReferenceType> list = new ArrayList<>();
+        for (String i : ctClass.getClassFile().getInterfaces()) {
+            ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = typeSolver.solveType(i);
+            ReferenceTypeImpl referenceType = new ReferenceTypeImpl(resolvedReferenceTypeDeclaration, typeSolver);
+            list.add(referenceType);
+        }
+        return list;
     }
 
     @Override
@@ -180,17 +185,25 @@ public class JavassistInterfaceDeclaration extends AbstractTypeDeclaration
         } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
-        ancestors = ancestors.stream().filter(a -> !a.getQualifiedName().equals(Object.class.getCanonicalName()))
-                .collect(Collectors.toList());
+        List<ResolvedReferenceType> list = new ArrayList<>();
+        for (ResolvedReferenceType a : ancestors) {
+            if (!a.getQualifiedName().equals(Object.class.getCanonicalName())) {
+                list.add(a);
+            }
+        }
+        ancestors = list;
         ancestors.add(new ReferenceTypeImpl(typeSolver.solveType(Object.class.getCanonicalName()), typeSolver));
         return ancestors;
     }
 
     @Override
     public Set<ResolvedMethodDeclaration> getDeclaredMethods() {
-        return Arrays.stream(ctClass.getDeclaredMethods())
-                .map(m -> new JavassistMethodDeclaration(m, typeSolver))
-                .collect(Collectors.toSet());
+        Set<ResolvedMethodDeclaration> set = new HashSet<>();
+        for (CtMethod m : ctClass.getDeclaredMethods()) {
+            JavassistMethodDeclaration javassistMethodDeclaration = new JavassistMethodDeclaration(m, typeSolver);
+            set.add(javassistMethodDeclaration);
+        }
+        return set;
     }
 
     @Override
@@ -264,7 +277,12 @@ public class JavassistInterfaceDeclaration extends AbstractTypeDeclaration
             Get all internal types of the current class and get their corresponding ReferenceTypeDeclaration.
             Finally, return them in a Set.
              */
-            return Arrays.stream(ctClass.getDeclaredClasses()).map(itype -> JavassistFactory.toTypeDeclaration(itype, typeSolver)).collect(Collectors.toSet());
+            Set<ResolvedReferenceTypeDeclaration> set = new HashSet<>();
+            for (CtClass itype : ctClass.getDeclaredClasses()) {
+                ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = JavassistFactory.toTypeDeclaration(itype, typeSolver);
+                set.add(resolvedReferenceTypeDeclaration);
+            }
+            return set;
         } catch (NotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -277,7 +295,13 @@ public class JavassistInterfaceDeclaration extends AbstractTypeDeclaration
         In case the name is composed of the internal type only, i.e. f.getName() returns B, it will also works.
          */
         Optional<ResolvedReferenceTypeDeclaration> type =
-                this.internalTypes().stream().filter(f -> f.getName().endsWith(name)).findFirst();
+                Optional.empty();
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().endsWith(name)) {
+                type = Optional.of(f);
+                break;
+            }
+        }
         return type.orElseThrow(() ->
                 new UnsolvedSymbolException("Internal type not found: " + name));
     }
@@ -288,7 +312,12 @@ public class JavassistInterfaceDeclaration extends AbstractTypeDeclaration
         The name of the ReferenceTypeDeclaration could be composed on the internal class and the outer class, e.g. A$B. That's why we search the internal type in the ending part.
         In case the name is composed of the internal type only, i.e. f.getName() returns B, it will also works.
          */
-        return this.internalTypes().stream().anyMatch(f -> f.getName().endsWith(name));
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().endsWith(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

@@ -21,6 +21,7 @@
 
 package com.github.javaparser.symbolsolver.resolution.typeinference.constraintformulas;
 
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.UnknownType;
@@ -32,10 +33,7 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typeinference.*;
 import com.github.javaparser.utils.Pair;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.github.javaparser.symbolsolver.resolution.typeinference.ExpressionHelper.isPolyExpression;
 import static com.github.javaparser.symbolsolver.resolution.typeinference.ExpressionHelper.isStandaloneExpression;
@@ -188,7 +186,13 @@ public class ExpressionCompatibleWithType extends ConstraintFormula {
                 //       - If the lambda parameters have explicitly declared types F1, ..., Fn and the function type
                 //         has parameter types G1, ..., Gn, then i) for all i (1 ≤ i ≤ n), ‹Fi = Gi›, and ii) ‹T' <: T›.
 
-                boolean hasExplicitlyDeclaredTypes = lambdaExpr.getParameters().stream().anyMatch(p -> !(p.getType() instanceof UnknownType));
+                boolean hasExplicitlyDeclaredTypes = false;
+                for (Parameter p : lambdaExpr.getParameters()) {
+                    if (!(p.getType() instanceof UnknownType)) {
+                        hasExplicitlyDeclaredTypes = true;
+                        break;
+                    }
+                }
                 if (hasExplicitlyDeclaredTypes) {
                     throw new UnsupportedOperationException();
                 }
@@ -224,7 +228,9 @@ public class ExpressionCompatibleWithType extends ConstraintFormula {
                         //           expressions e1, ..., em, for all i (1 ≤ i ≤ m), ‹ei → R›.
 
                         if (lambdaExpr.getBody() instanceof BlockStmt) {
-                            getAllReturnExpressions((BlockStmt)lambdaExpr.getBody()).forEach(e -> constraints.add(new ExpressionCompatibleWithType(typeSolver, e, R)));
+                            for (Expression e : getAllReturnExpressions((BlockStmt) lambdaExpr.getBody())) {
+                                constraints.add(new ExpressionCompatibleWithType(typeSolver, e, R));
+                            }
                         } else {
                             // FEDERICO: Added - Start
                             for (int i=0;i<lambdaExpr.getParameters().size();i++) {
@@ -281,10 +287,14 @@ public class ExpressionCompatibleWithType extends ConstraintFormula {
     }
 
     private List<Expression> getAllReturnExpressions(BlockStmt blockStmt) {
-        return blockStmt.findAll(ReturnStmt.class).stream()
-                .filter(r -> r.getExpression().isPresent())
-                .map(r -> r.getExpression().get())
-                .collect(toList());
+        List<Expression> list = new ArrayList<>();
+        for (ReturnStmt r : blockStmt.findAll(ReturnStmt.class)) {
+            if (r.getExpression().isPresent()) {
+                Expression expression1 = r.getExpression().get();
+                list.add(expression1);
+            }
+        }
+        return list;
     }
 
     private boolean isValueCompatibleBlock(Statement statement) {
@@ -296,7 +306,12 @@ public class ExpressionCompatibleWithType extends ConstraintFormula {
                 return true;
             }
             List<ReturnStmt> returnStmts = statement.findAll(ReturnStmt.class);
-            return returnStmts.stream().allMatch(r -> r.getExpression().isPresent());
+            for (ReturnStmt r : returnStmts) {
+                if (!r.getExpression().isPresent()) {
+                    return false;
+                }
+            }
+            return true;
         }
         return false;
     }

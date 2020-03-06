@@ -27,10 +27,8 @@ import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclar
 import com.github.javaparser.resolution.declarations.ResolvedTypeParametrizable;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.GenericDeclaration;
-import java.lang.reflect.Method;
-import java.lang.reflect.TypeVariable;
+import java.lang.reflect.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -115,7 +113,12 @@ public class ReflectionTypeParameter implements ResolvedTypeParameterDeclaration
 
     @Override
     public List<Bound> getBounds() {
-        return Arrays.stream(typeVariable.getBounds()).map((refB) -> Bound.extendsBound(ReflectionFactory.typeUsageFor(refB, typeSolver))).collect(Collectors.toList());
+        List<Bound> list = new ArrayList<>();
+        for (Type refB : typeVariable.getBounds()) {
+            Bound bound = Bound.extendsBound(ReflectionFactory.typeUsageFor(refB, typeSolver));
+            list.add(bound);
+        }
+        return list;
     }
 
     @Override

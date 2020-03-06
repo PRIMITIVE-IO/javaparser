@@ -404,7 +404,12 @@ public class JavaParserFacade {
         if (!typeDeclarationSymbolReference.isSolved()) {
             throw new UnsupportedOperationException();
         }
-        List<MethodUsage> methodUsages = ((ResolvedReferenceTypeDeclaration) typeDeclarationSymbolReference.getCorrespondingDeclaration()).getAllMethods().stream().filter(it -> it.getName().equals(methodReferenceExpr.getIdentifier())).collect(Collectors.toList());
+        List<MethodUsage> methodUsages = new ArrayList<>();
+        for (MethodUsage it : ((ResolvedReferenceTypeDeclaration) typeDeclarationSymbolReference.getCorrespondingDeclaration()).getAllMethods()) {
+            if (it.getName().equals(methodReferenceExpr.getIdentifier())) {
+                methodUsages.add(it);
+            }
+        }
         switch (methodUsages.size()) {
             case 0:
                 throw new UnsupportedOperationException();
@@ -548,7 +553,12 @@ public class JavaParserFacade {
             ResolvedTypeDeclaration typeDeclaration = ref.getCorrespondingDeclaration();
             List<ResolvedType> typeParameters = Collections.emptyList();
             if (classOrInterfaceType.getTypeArguments().isPresent()) {
-                typeParameters = classOrInterfaceType.getTypeArguments().get().stream().map((pt) -> convertToUsage(pt, context)).collect(Collectors.toList());
+                List<ResolvedType> list = new ArrayList<>();
+                for (Type pt : classOrInterfaceType.getTypeArguments().get()) {
+                    ResolvedType resolvedType = convertToUsage(pt, context);
+                    list.add(resolvedType);
+                }
+                typeParameters = list;
             }
             if (typeDeclaration.isTypeParameter()) {
                 if (typeDeclaration instanceof ResolvedTypeParameterDeclaration) {
@@ -580,7 +590,12 @@ public class JavaParserFacade {
             return new ResolvedArrayType(convertToUsage(jpArrayType.getComponentType(), context));
         } else if (type instanceof UnionType) {
             UnionType unionType = (UnionType) type;
-            return new ResolvedUnionType(unionType.getElements().stream().map(el -> convertToUsage(el, context)).collect(Collectors.toList()));
+            List<ResolvedType> list = new ArrayList<>();
+            for (ReferenceType el : unionType.getElements()) {
+                ResolvedType resolvedType = convertToUsage(el, context);
+                list.add(resolvedType);
+            }
+            return new ResolvedUnionType(list);
         } else if (type instanceof VarType) {
             Node parent = type.getParentNode().get();
             if (!(parent instanceof VariableDeclarator)) {

@@ -147,7 +147,12 @@ public class JavaParserTypeParameter extends AbstractTypeDeclaration implements 
 
     @Override
     public List<Bound> getBounds() {
-        return wrappedNode.getTypeBound().stream().map((astB) -> toBound(astB, typeSolver)).collect(Collectors.toList());
+        List<Bound> list = new ArrayList<>();
+        for (ClassOrInterfaceType astB : wrappedNode.getTypeBound()) {
+            Bound bound = toBound(astB, typeSolver);
+            list.add(bound);
+        }
+        return list;
     }
 
     private Bound toBound(ClassOrInterfaceType classOrInterfaceType, TypeSolver typeSolver) {

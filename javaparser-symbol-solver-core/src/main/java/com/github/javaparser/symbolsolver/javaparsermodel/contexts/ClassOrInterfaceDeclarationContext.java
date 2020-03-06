@@ -124,8 +124,12 @@ public class ClassOrInterfaceDeclarationContext extends AbstractJavaParserContex
     public List<ResolvedFieldDeclaration> fieldsExposedToChild(Node child) {
         List<ResolvedFieldDeclaration> fields = new LinkedList<>();
         fields.addAll(this.wrappedNode.resolve().getDeclaredFields());
-        this.wrappedNode.getExtendedTypes().forEach(i -> fields.addAll(i.resolve().getAllFieldsVisibleToInheritors()));
-        this.wrappedNode.getImplementedTypes().forEach(i -> fields.addAll(i.resolve().getAllFieldsVisibleToInheritors()));
+        for (ClassOrInterfaceType classOrInterfaceType : this.wrappedNode.getExtendedTypes()) {
+            fields.addAll(classOrInterfaceType.resolve().getAllFieldsVisibleToInheritors());
+        }
+        for (ClassOrInterfaceType i : this.wrappedNode.getImplementedTypes()) {
+            fields.addAll(i.resolve().getAllFieldsVisibleToInheritors());
+        }
         return fields;
     }
 

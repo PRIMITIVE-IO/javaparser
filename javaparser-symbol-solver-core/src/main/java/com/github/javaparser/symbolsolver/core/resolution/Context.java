@@ -129,8 +129,14 @@ public interface Context {
         if (getParent() == null) {
             return Optional.empty();
         }
-        Optional<VariableDeclarator> localRes = getParent().localVariablesExposedToChild(((AbstractJavaParserContext)this)
-                .getWrappedNode()).stream().filter(vd -> vd.getNameAsString().equals(name)).findFirst();
+        Optional<VariableDeclarator> localRes = Optional.empty();
+        for (VariableDeclarator vd : getParent().localVariablesExposedToChild(((AbstractJavaParserContext) this)
+                .getWrappedNode())) {
+            if (vd.getNameAsString().equals(name)) {
+                localRes = Optional.of(vd);
+                break;
+            }
+        }
         if (localRes.isPresent()) {
             return localRes;
         }
@@ -142,8 +148,14 @@ public interface Context {
         if (getParent() == null) {
             return Optional.empty();
         }
-        Optional<Parameter> localRes = getParent().parametersExposedToChild(((AbstractJavaParserContext)this)
-                .getWrappedNode()).stream().filter(vd -> vd.getNameAsString().equals(name)).findFirst();
+        Optional<Parameter> localRes = Optional.empty();
+        for (Parameter vd : getParent().parametersExposedToChild(((AbstractJavaParserContext) this)
+                .getWrappedNode())) {
+            if (vd.getNameAsString().equals(name)) {
+                localRes = Optional.of(vd);
+                break;
+            }
+        }
         if (localRes.isPresent()) {
             return localRes;
         }
@@ -155,8 +167,14 @@ public interface Context {
         if (getParent() == null) {
             return Optional.empty();
         }
-        Optional<ResolvedFieldDeclaration> localRes = getParent().fieldsExposedToChild(((AbstractJavaParserContext)this)
-                .getWrappedNode()).stream().filter(vd -> vd.getName().equals(name)).findFirst();
+        Optional<ResolvedFieldDeclaration> localRes = Optional.empty();
+        for (ResolvedFieldDeclaration vd : getParent().fieldsExposedToChild(((AbstractJavaParserContext) this)
+                .getWrappedNode())) {
+            if (vd.getName().equals(name)) {
+                localRes = Optional.of(vd);
+                break;
+            }
+        }
         if (localRes.isPresent()) {
             return localRes;
         }

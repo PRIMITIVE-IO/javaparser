@@ -32,7 +32,9 @@ import com.github.javaparser.ast.stmt.ExplicitConstructorInvocationStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
+import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration;
 import com.github.javaparser.symbolsolver.core.resolution.Context;
@@ -427,11 +429,15 @@ public class NameLogic {
                 ResolvedTypeDeclaration scopeType = scopeTypeRef.getCorrespondingDeclaration();
                 if (scopeType instanceof ResolvedReferenceTypeDeclaration) {
                     ResolvedReferenceTypeDeclaration scopeRefType = scopeType.asReferenceType();
-                    if (scopeRefType.getAllMethods().stream().anyMatch(m -> m.getName().equals(rightName))) {
-                        return NameCategory.EXPRESSION_NAME;
+                    for (MethodUsage m : scopeRefType.getAllMethods()) {
+                        if (m.getName().equals(rightName)) {
+                            return NameCategory.EXPRESSION_NAME;
+                        }
                     }
-                    if (scopeRefType.getAllFields().stream().anyMatch(f -> f.isStatic() && f.getName().equals(rightName))) {
-                        return NameCategory.EXPRESSION_NAME;
+                    for (ResolvedFieldDeclaration f : scopeRefType.getAllFields()) {
+                        if (f.isStatic() && f.getName().equals(rightName)) {
+                            return NameCategory.EXPRESSION_NAME;
+                        }
                     }
                     if (scopeRefType.hasInternalType(rightName)) {
                         return NameCategory.TYPE_NAME;

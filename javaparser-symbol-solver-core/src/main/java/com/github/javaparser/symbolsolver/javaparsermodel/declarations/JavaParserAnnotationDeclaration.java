@@ -23,6 +23,7 @@ package com.github.javaparser.symbolsolver.javaparsermodel.declarations;
 
 import com.github.javaparser.ast.body.AnnotationDeclaration;
 import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.resolution.declarations.*;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
 import com.github.javaparser.resolution.types.ResolvedType;
@@ -129,10 +130,14 @@ public class JavaParserAnnotationDeclaration extends AbstractTypeDeclaration imp
 
     @Override
     public List<ResolvedAnnotationMemberDeclaration> getAnnotationMembers() {
-        return wrappedNode.getMembers().stream()
-                .filter(m -> m instanceof AnnotationMemberDeclaration)
-                .map(m -> new JavaParserAnnotationMemberDeclaration((AnnotationMemberDeclaration)m, typeSolver))
-                .collect(Collectors.toList());
+        List<ResolvedAnnotationMemberDeclaration> list = new ArrayList<>();
+        for (BodyDeclaration<?> m : wrappedNode.getMembers()) {
+            if (m instanceof AnnotationMemberDeclaration) {
+                JavaParserAnnotationMemberDeclaration javaParserAnnotationMemberDeclaration = new JavaParserAnnotationMemberDeclaration((AnnotationMemberDeclaration) m, typeSolver);
+                list.add(javaParserAnnotationMemberDeclaration);
+            }
+        }
+        return list;
     }
 
     @Override

@@ -292,9 +292,12 @@ public class ReflectionInterfaceDeclaration extends AbstractTypeDeclaration
 
     @Override
     public Set<ResolvedReferenceTypeDeclaration> internalTypes() {
-        return Arrays.stream(this.clazz.getDeclaredClasses())
-                .map(ic -> ReflectionFactory.typeDeclarationFor(ic, typeSolver))
-                .collect(Collectors.toSet());
+        Set<ResolvedReferenceTypeDeclaration> set = new HashSet<>();
+        for (Class<?> ic : this.clazz.getDeclaredClasses()) {
+            ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = ReflectionFactory.typeDeclarationFor(ic, typeSolver);
+            set.add(resolvedReferenceTypeDeclaration);
+        }
+        return set;
     }
 
     @Override

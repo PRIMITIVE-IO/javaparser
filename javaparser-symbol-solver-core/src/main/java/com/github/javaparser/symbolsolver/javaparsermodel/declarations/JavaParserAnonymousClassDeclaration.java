@@ -23,6 +23,10 @@ package com.github.javaparser.symbolsolver.javaparsermodel.declarations;
 
 import com.github.javaparser.ast.AccessSpecifier;
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.body.BodyDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ObjectCreationExpr;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.MethodUsage;
@@ -77,13 +81,16 @@ public class JavaParserAnonymousClassDeclaration extends AbstractClassDeclaratio
 
   public <T extends Node> List<T> findMembersOfKind(final Class<T> memberClass) {
     if (wrappedNode.getAnonymousClassBody().isPresent()) {
-      return wrappedNode
+      List<T> list = new ArrayList<>();
+      for (BodyDeclaration<?> node : wrappedNode
               .getAnonymousClassBody()
-              .get()
-              .stream()
-              .filter(node -> memberClass.isAssignableFrom(node.getClass()))
-              .map(memberClass::cast)
-              .collect(Collectors.toList());
+              .get()) {
+        if (memberClass.isAssignableFrom(node.getClass())) {
+          T cast = memberClass.cast(node);
+          list.add(cast);
+        }
+      }
+      return list;
     } else {
       return Collections.emptyList();
     }
@@ -121,12 +128,15 @@ public class JavaParserAnonymousClassDeclaration extends AbstractClassDeclaratio
 
   @Override
   public List<ResolvedReferenceType> getInterfaces() {
+    List<ResolvedReferenceType> list = new ArrayList<>();
+    for (ResolvedReferenceType type : superTypeDeclaration
+            .asReferenceType().getAncestors()) {
+      if (type.getTypeDeclaration().isInterface()) {
+        list.add(type);
+      }
+    }
     return
-        superTypeDeclaration
-            .asReferenceType().getAncestors()
-            .stream()
-            .filter(type -> type.getTypeDeclaration().isInterface())
-            .collect(Collectors.toList());
+            list;
   }
 
   @Override
@@ -156,21 +166,25 @@ public class JavaParserAnonymousClassDeclaration extends AbstractClassDeclaratio
   public List<ResolvedFieldDeclaration> getAllFields() {
 
     List<JavaParserFieldDeclaration> myFields =
-        findMembersOfKind(com.github.javaparser.ast.body.FieldDeclaration.class)
-            .stream()
-            .flatMap(field ->
-                         field.getVariables().stream()
-                              .map(variable -> new JavaParserFieldDeclaration(variable,
-                                                                              typeSolver)))
-            .collect(Collectors.toList());
+            new ArrayList<>();
+    for (FieldDeclaration field : findMembersOfKind(FieldDeclaration.class)) {
+      for (VariableDeclarator variable : field.getVariables()) {
+        JavaParserFieldDeclaration javaParserFieldDeclaration = new JavaParserFieldDeclaration(variable,
+                typeSolver);
+        myFields.add(javaParserFieldDeclaration);
+      }
+    }
 
     List<ResolvedFieldDeclaration> superClassFields =
         getSuperClass().getTypeDeclaration().getAllFields();
 
     List<ResolvedFieldDeclaration> interfaceFields =
-        getInterfaces().stream()
-                       .flatMap(inteface -> inteface.getTypeDeclaration().getAllFields().stream())
-                       .collect(Collectors.toList());
+            new ArrayList<>();
+    for (ResolvedReferenceType inteface : getInterfaces()) {
+      for (ResolvedFieldDeclaration resolvedFieldDeclaration : inteface.getTypeDeclaration().getAllFields()) {
+        interfaceFields.add(resolvedFieldDeclaration);
+      }
+    }
 
     return
         ImmutableList
@@ -183,11 +197,13 @@ public class JavaParserAnonymousClassDeclaration extends AbstractClassDeclaratio
 
   @Override
   public Set<ResolvedMethodDeclaration> getDeclaredMethods() {
+    Set<ResolvedMethodDeclaration> set = new HashSet<>();
+    for (MethodDeclaration method : findMembersOfKind(MethodDeclaration.class)) {
+      JavaParserMethodDeclaration javaParserMethodDeclaration = new JavaParserMethodDeclaration(method, typeSolver);
+      set.add(javaParserMethodDeclaration);
+    }
     return
-        findMembersOfKind(com.github.javaparser.ast.body.MethodDeclaration.class)
-            .stream()
-            .map(method -> new JavaParserMethodDeclaration(method, typeSolver))
-            .collect(Collectors.toSet());
+            set;
   }
 
   @Override

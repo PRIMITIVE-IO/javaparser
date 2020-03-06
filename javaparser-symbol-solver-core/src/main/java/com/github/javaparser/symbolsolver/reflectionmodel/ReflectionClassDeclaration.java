@@ -144,8 +144,16 @@ public class ReflectionClassDeclaration extends AbstractClassDeclaration impleme
     public SymbolReference<ResolvedMethodDeclaration> solveMethod(String name, List<ResolvedType> argumentsTypes, boolean staticOnly) {
         List<ResolvedMethodDeclaration> methods = new ArrayList<>();
         Predicate<Method> staticFilter = m -> !staticOnly || (staticOnly && Modifier.isStatic(m.getModifiers()));
-        for (Method method : Arrays.stream(clazz.getDeclaredMethods()).filter((m) -> m.getName().equals(name)).filter(staticFilter)
-                                    .sorted(new MethodComparator()).collect(Collectors.toList())) {
+        List<Method> list = new ArrayList<>();
+        for (Method m : clazz.getDeclaredMethods()) {
+            if (m.getName().equals(name)) {
+                if (staticFilter.test(m)) {
+                    list.add(m);
+                }
+            }
+        }
+        list.sort(new MethodComparator());
+        for (Method method : list) {
             if (method.isBridge() || method.isSynthetic()) continue;
             ResolvedMethodDeclaration methodDeclaration = new ReflectionMethodDeclaration(method, typeSolver);
             methods.add(methodDeclaration);
@@ -192,7 +200,14 @@ public class ReflectionClassDeclaration extends AbstractClassDeclaration impleme
 
     public Optional<MethodUsage> solveMethodAsUsage(String name, List<ResolvedType> argumentsTypes, Context invokationContext, List<ResolvedType> typeParameterValues) {
         List<MethodUsage> methods = new ArrayList<>();
-        for (Method method : Arrays.stream(clazz.getDeclaredMethods()).filter((m) -> m.getName().equals(name)).sorted(new MethodComparator()).collect(Collectors.toList())) {
+        List<Method> list = new ArrayList<>();
+        for (Method m : clazz.getDeclaredMethods()) {
+            if (m.getName().equals(name)) {
+                list.add(m);
+            }
+        }
+        list.sort(new MethodComparator());
+        for (Method method : list) {
             if (method.isBridge() || method.isSynthetic()) continue;
             ResolvedMethodDeclaration methodDeclaration = new ReflectionMethodDeclaration(method, typeSolver);
             MethodUsage methodUsage = new MethodUsage(methodDeclaration);
@@ -353,9 +368,12 @@ public class ReflectionClassDeclaration extends AbstractClassDeclaration impleme
     
     @Override
     public Set<ResolvedReferenceTypeDeclaration> internalTypes() {
-        return Arrays.stream(this.clazz.getDeclaredClasses())
-                .map(ic -> ReflectionFactory.typeDeclarationFor(ic, typeSolver))
-                .collect(Collectors.toSet());
+        Set<ResolvedReferenceTypeDeclaration> set = new HashSet<>();
+        for (Class<?> ic : this.clazz.getDeclaredClasses()) {
+            ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration = ReflectionFactory.typeDeclarationFor(ic, typeSolver);
+            set.add(resolvedReferenceTypeDeclaration);
+        }
+        return set;
     }
 
     @Override

@@ -37,6 +37,7 @@ import com.github.javaparser.symbolsolver.logic.FunctionalInterfaceLogic;
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -52,9 +53,12 @@ public class ReferenceTypeImpl extends ResolvedReferenceType {
     private TypeSolver typeSolver;
 
     public static ResolvedReferenceType undeterminedParameters(ResolvedReferenceTypeDeclaration typeDeclaration, TypeSolver typeSolver) {
-        return new ReferenceTypeImpl(typeDeclaration, typeDeclaration.getTypeParameters().stream().map(
-                ResolvedTypeVariable::new
-        ).collect(Collectors.toList()), typeSolver);
+        List<ResolvedType> list = new ArrayList<>();
+        for (ResolvedTypeParameterDeclaration resolvedTypeParameterDeclaration : typeDeclaration.getTypeParameters()) {
+            ResolvedTypeVariable resolvedTypeVariable = new ResolvedTypeVariable(resolvedTypeParameterDeclaration);
+            list.add(resolvedTypeVariable);
+        }
+        return new ReferenceTypeImpl(typeDeclaration, list, typeSolver);
     }
 
     @Override
@@ -170,7 +174,12 @@ public class ReferenceTypeImpl extends ResolvedReferenceType {
 
     @Override
     public boolean mention(List<ResolvedTypeParameterDeclaration> typeParameters) {
-        return typeParametersValues().stream().anyMatch(tp -> tp.mention(typeParameters));
+        for (ResolvedType tp : typeParametersValues()) {
+            if (tp.mention(typeParameters)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -198,9 +207,12 @@ public class ReferenceTypeImpl extends ResolvedReferenceType {
 
         List<ResolvedReferenceType> ancestors = typeDeclaration.getAllAncestors();
 
-        ancestors = ancestors.stream()
-                .map(a -> typeParametersMap().replaceAll(a).asReferenceType())
-                .collect(Collectors.toList());
+        List<ResolvedReferenceType> list = new ArrayList<>();
+        for (ResolvedReferenceType ancestor : ancestors) {
+            ResolvedReferenceType resolvedReferenceType = typeParametersMap().replaceAll(ancestor).asReferenceType();
+            list.add(resolvedReferenceType);
+        }
+        ancestors = list;
 
         // Avoid repetitions of Object
         ancestors.removeIf(a -> a.getQualifiedName().equals(Object.class.getCanonicalName()));
@@ -215,9 +227,12 @@ public class ReferenceTypeImpl extends ResolvedReferenceType {
 
         List<ResolvedReferenceType> ancestors = typeDeclaration.getAncestors();
 
-        ancestors = ancestors.stream()
-                .map(a -> typeParametersMap().replaceAll(a).asReferenceType())
-                .collect(Collectors.toList());
+        List<ResolvedReferenceType> list = new ArrayList<>();
+        for (ResolvedReferenceType ancestor : ancestors) {
+            ResolvedReferenceType resolvedReferenceType = typeParametersMap().replaceAll(ancestor).asReferenceType();
+            list.add(resolvedReferenceType);
+        }
+        ancestors = list;
 
         // Avoid repetitions of Object
         ancestors.removeIf(a -> a.getQualifiedName().equals(Object.class.getCanonicalName()));

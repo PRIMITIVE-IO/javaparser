@@ -31,10 +31,7 @@ import javassist.CtConstructor;
 import javassist.NotFoundException;
 import javassist.bytecode.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -122,7 +119,12 @@ public class JavassistConstructorDeclaration implements ResolvedConstructorDecla
                 return Collections.emptyList();
             }
             SignatureAttribute.MethodSignature methodSignature = SignatureAttribute.toMethodSignature(ctConstructor.getGenericSignature());
-            return Arrays.stream(methodSignature.getTypeParameters()).map((jasTp) -> new JavassistTypeParameter(jasTp, this, typeSolver)).collect(Collectors.toList());
+            List<ResolvedTypeParameterDeclaration> list = new ArrayList<>();
+            for (SignatureAttribute.TypeParameter jasTp : methodSignature.getTypeParameters()) {
+                JavassistTypeParameter javassistTypeParameter = new JavassistTypeParameter(jasTp, this, typeSolver);
+                list.add(javassistTypeParameter);
+            }
+            return list;
         } catch (BadBytecode badBytecode) {
             throw new RuntimeException(badBytecode);
         }

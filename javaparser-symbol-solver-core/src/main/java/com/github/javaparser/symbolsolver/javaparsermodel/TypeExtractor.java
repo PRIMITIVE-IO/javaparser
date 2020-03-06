@@ -458,11 +458,15 @@ public class TypeExtractor extends DefaultVisitorAdapter {
                         List<ReturnStmt> returnStmts = blockStmt.findAll(ReturnStmt.class);
 
                         if (returnStmts.size() > 0) {
-                            actualType = returnStmts.stream()
-                                    .map(returnStmt -> returnStmt.getExpression().map(e -> facade.getType(e)).orElse(ResolvedVoidType.INSTANCE))
-                                    .filter(x -> x != null && !x.isVoid() && !x.isNull())
-                                    .findFirst()
-                                    .orElse(ResolvedVoidType.INSTANCE);
+                            ResolvedType found = ResolvedVoidType.INSTANCE;
+                            for (ReturnStmt returnStmt : returnStmts) {
+                                ResolvedType x = returnStmt.getExpression().map(e -> facade.getType(e)).orElse(ResolvedVoidType.INSTANCE);
+                                if (x != null && !x.isVoid() && !x.isNull()) {
+                                    found = x;
+                                    break;
+                                }
+                            }
+                            actualType = found;
 
                         } else {
                             return ResolvedVoidType.INSTANCE;

@@ -365,18 +365,26 @@ public class MethodResolutionLogic {
 
     public static SymbolReference<ResolvedMethodDeclaration> findMostApplicable(List<ResolvedMethodDeclaration> methods,
                                                                                 String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver, boolean wildcardTolerance) {
-        
-        List<ResolvedMethodDeclaration> methodsWithMatchingName = methods.stream()
-                .filter(m -> m.getName().equals(name))
-                .collect(Collectors.toList());
-        
-        List<ResolvedMethodDeclaration> applicableMethods = methodsWithMatchingName.stream()
-                // Filters out duplicate ResolvedMethodDeclaration by their signature.
-                .filter(distinctByKey(ResolvedMethodDeclaration::getQualifiedSignature)) 
-                // Checks if ResolvedMethodDeclaration is applicable to argumentsTypes.
-                .filter((m) -> isApplicable(m, name, argumentsTypes, typeSolver, wildcardTolerance))
-                .collect(Collectors.toList());
-        
+
+        List<ResolvedMethodDeclaration> methodsWithMatchingName = new ArrayList<>();
+        for (ResolvedMethodDeclaration method : methods) {
+            if (method.getName().equals(name)) {
+                methodsWithMatchingName.add(method);
+            }
+        }
+
+        // Filters out duplicate ResolvedMethodDeclaration by their signature.
+        // Checks if ResolvedMethodDeclaration is applicable to argumentsTypes.
+        List<ResolvedMethodDeclaration> applicableMethods = new ArrayList<>();
+        Predicate<ResolvedMethodDeclaration> predicate = distinctByKey(ResolvedMethodDeclaration::getQualifiedSignature);
+        for (ResolvedMethodDeclaration m : methodsWithMatchingName) {
+            if (predicate.test(m)) {
+                if (isApplicable(m, name, argumentsTypes, typeSolver, wildcardTolerance)) {
+                    applicableMethods.add(m);
+                }
+            }
+        }
+
         if (applicableMethods.isEmpty()) {
             return SymbolReference.unsolved(ResolvedMethodDeclaration.class);
         }
@@ -560,7 +568,12 @@ public class MethodResolutionLogic {
     }
 
     public static Optional<MethodUsage> findMostApplicableUsage(List<MethodUsage> methods, String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver) {
-        List<MethodUsage> applicableMethods = methods.stream().filter((m) -> isApplicable(m, name, argumentsTypes, typeSolver)).collect(Collectors.toList());
+        List<MethodUsage> applicableMethods = new ArrayList<>();
+        for (MethodUsage m : methods) {
+            if (isApplicable(m, name, argumentsTypes, typeSolver)) {
+                applicableMethods.add(m);
+            }
+        }
 
         if (applicableMethods.isEmpty()) {
             return Optional.empty();

@@ -195,7 +195,9 @@ public class SourceFileInfoExtractor {
                     }
                     CompilationUnit cu = parse(file);
                     List<Node> nodes = collectAllNodes(cu);
-                    nodes.forEach(n -> solve(n));
+                    for (Node n : nodes) {
+                        solve(n);
+                    }
                 }
                 return FileVisitResult.CONTINUE;
             }

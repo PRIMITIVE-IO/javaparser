@@ -382,7 +382,13 @@ public class BoundSet {
         // When a bound set contains a bound of the form G<α1, ..., αn> = capture(G<A1, ..., An>), new bounds are
         // implied and new constraint formulas may be implied, as follows.
 
-        for (Bound b : this.bounds.stream().filter(b -> b instanceof CapturesBound).collect(Collectors.toList())) {
+        List<Bound> list = new ArrayList<>();
+        for (Bound bound : this.bounds) {
+            if (bound instanceof CapturesBound) {
+                list.add(bound);
+            }
+        }
+        for (Bound b : list) {
             CapturesBound capturesBound = (CapturesBound)b;
 
             throw new UnsupportedOperationException();
@@ -437,7 +443,12 @@ public class BoundSet {
     }
 
     public boolean containsFalse() {
-        return bounds.stream().anyMatch(it -> it instanceof FalseBound);
+        for (Bound it : bounds) {
+            if (it instanceof FalseBound) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private class VariableDependency {
@@ -546,11 +557,16 @@ public class BoundSet {
      */
     private boolean hasProperty(Set<InferenceVariable> alphas, List<VariableDependency> dependencies) {
         for (InferenceVariable alphaI: alphas) {
-            for (InferenceVariable beta: dependencies.stream()
-                    .filter(d -> d.depending.equals(alphaI))
-                    .filter(d -> !d.isReflexive())
-                    .map(d -> d.dependedOn)
-                    .collect(Collectors.toList())) {
+            List<InferenceVariable> list = new ArrayList<>();
+            for (VariableDependency d : dependencies) {
+                if (d.depending.equals(alphaI)) {
+                    if (!d.isReflexive()) {
+                        InferenceVariable dependedOn = d.dependedOn;
+                        list.add(dependedOn);
+                    }
+                }
+            }
+            for (InferenceVariable beta: list) {
                 if (!hasInstantiationFor(beta) && !thereIsSomeJSuchThatβequalAlphaJ(alphas, beta)) {
                     return false;
                 }
@@ -670,9 +686,13 @@ public class BoundSet {
             // Resolution proceeds by generating an instantiation for each of α1, ..., αn based on the
             // bounds in the bound set:
 
-            boolean hasSomeCaptureForAlphas = alphas.stream().anyMatch(
-                    alphaI -> appearInLeftPartOfCapture(alphaI)
-            );
+            boolean hasSomeCaptureForAlphas = false;
+            for (InferenceVariable alpha : alphas) {
+                if (appearInLeftPartOfCapture(alpha)) {
+                    hasSomeCaptureForAlphas = true;
+                    break;
+                }
+            }
 
             // - If the bound set does not contain a bound of the form G<..., αi, ...> = capture(G<...>)
             //   for all i (1 ≤ i ≤ n), then a candidate instantiation Ti is defined for each αi:
@@ -680,10 +700,13 @@ public class BoundSet {
             if (!hasSomeCaptureForAlphas) {
                 BoundSet newBounds = BoundSet.empty();
                 for (InferenceVariable alphaI : alphas) {
-                    Set<ResolvedType> properLowerBounds = bounds.stream()
-                            .filter(b -> b.isProperLowerBoundFor(alphaI).isPresent())
-                            .map(b -> b.isProperLowerBoundFor(alphaI).get().getProperType())
-                            .collect(Collectors.toSet());
+                    Set<ResolvedType> properLowerBounds = new HashSet<>();
+                    for (Bound b1 : bounds) {
+                        if (b1.isProperLowerBoundFor(alphaI).isPresent()) {
+                            ResolvedType type = b1.isProperLowerBoundFor(alphaI).get().getProperType();
+                            properLowerBounds.add(type);
+                        }
+                    }
 
                     ResolvedType Ti = null;
 
@@ -696,7 +719,13 @@ public class BoundSet {
                     //   - Otherwise, if the bound set contains throws αi, and the proper upper bounds of αi are, at most,
                     //     Exception, Throwable, and Object, then Ti = RuntimeException.
 
-                    boolean throwsBound = bounds.stream().anyMatch(b -> b.isThrowsBoundOn(alphaI));
+                    boolean throwsBound = false;
+                    for (Bound bound : bounds) {
+                        if (bound.isThrowsBoundOn(alphaI)) {
+                            throwsBound = true;
+                            break;
+                        }
+                    }
                     if (Ti == null && throwsBound && properUpperBoundsAreAtMostExceptionThrowableAndObject(alphaI)) {
                         Ti = new ReferenceTypeImpl(typeSolver.solveType(RuntimeException.class.getCanonicalName()), typeSolver);
                     }
@@ -704,10 +733,13 @@ public class BoundSet {
                     //   - Otherwise, where αi has proper upper bounds U1, ..., Uk, Ti = glb(U1, ..., Uk) (§5.1.10).
 
                     if (Ti == null) {
-                        Set<ResolvedType> properUpperBounds = bounds.stream()
-                                .filter(b -> b.isProperUpperBoundFor(alphaI).isPresent())
-                                .map(b -> b.isProperUpperBoundFor(alphaI).get().getProperType())
-                                .collect(Collectors.toSet());
+                        Set<ResolvedType> properUpperBounds = new HashSet<>();
+                        for (Bound b : bounds) {
+                            if (b.isProperUpperBoundFor(alphaI).isPresent()) {
+                                ResolvedType properType = b.isProperUpperBoundFor(alphaI).get().getProperType();
+                                properUpperBounds.add(properType);
+                            }
+                        }
                         if (properUpperBounds.size() == 0) {
                             throw new IllegalStateException();
                         }
@@ -820,6 +852,12 @@ public class BoundSet {
     }
 
     public List<Bound> getProperUpperBoundsFor(InferenceVariable inferenceVariable) {
-        return bounds.stream().filter(b -> b.isProperUpperBoundFor(inferenceVariable).isPresent()).collect(Collectors.toList());
+        List<Bound> list = new ArrayList<>();
+        for (Bound b : bounds) {
+            if (b.isProperUpperBoundFor(inferenceVariable).isPresent()) {
+                list.add(b);
+            }
+        }
+        return list;
     }
 }
