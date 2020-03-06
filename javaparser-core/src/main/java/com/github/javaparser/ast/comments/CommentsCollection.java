@@ -23,9 +23,7 @@ package com.github.javaparser.ast.comments;
 
 import com.github.javaparser.Range;
 
-import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.github.javaparser.ast.Node.NODE_BY_BEGIN_POSITION;
@@ -44,24 +42,36 @@ public class CommentsCollection {
     }
 
     public Set<LineComment> getLineComments() {
-        return comments.stream()
-                .filter(comment -> comment instanceof LineComment)
-                .map(comment -> (LineComment) comment)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(NODE_BY_BEGIN_POSITION)));
+        TreeSet<LineComment> lineComments = new TreeSet<>(NODE_BY_BEGIN_POSITION);
+        for (Comment comment : comments) {
+            if (comment instanceof LineComment) {
+                LineComment lineComment = (LineComment) comment;
+                lineComments.add(lineComment);
+            }
+        }
+        return lineComments;
     }
 
     public Set<BlockComment> getBlockComments() {
-        return comments.stream()
-                .filter(comment -> comment instanceof BlockComment)
-                .map(comment -> (BlockComment) comment)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(NODE_BY_BEGIN_POSITION)));
+        TreeSet<BlockComment> blockComments = new TreeSet<>(NODE_BY_BEGIN_POSITION);
+        for (Comment comment : comments) {
+            if (comment instanceof BlockComment) {
+                BlockComment blockComment = (BlockComment) comment;
+                blockComments.add(blockComment);
+            }
+        }
+        return blockComments;
     }
 
     public Set<JavadocComment> getJavadocComments() {
-        return comments.stream()
-                .filter(comment -> comment instanceof JavadocComment)
-                .map(comment -> (JavadocComment) comment)
-                .collect(Collectors.toCollection(() -> new TreeSet<>(NODE_BY_BEGIN_POSITION)));
+        TreeSet<JavadocComment> javadocComments = new TreeSet<>(NODE_BY_BEGIN_POSITION);
+        for (Comment comment : comments) {
+            if (comment instanceof JavadocComment) {
+                JavadocComment javadocComment = (JavadocComment) comment;
+                javadocComments.add(javadocComment);
+            }
+        }
+        return javadocComments;
     }
 
     public void addComment(Comment comment) {
@@ -99,10 +109,14 @@ public class CommentsCollection {
 
     public CommentsCollection minus(CommentsCollection other) {
         CommentsCollection result = new CommentsCollection();
+        List<Comment> list = new ArrayList<>();
+        for (Comment comment : comments) {
+            if (!other.contains(comment)) {
+                list.add(comment);
+            }
+        }
         result.comments.addAll(
-                comments.stream()
-                        .filter(comment -> !other.contains(comment))
-                        .collect(Collectors.toList()));
+                list);
         return result;
     }
 

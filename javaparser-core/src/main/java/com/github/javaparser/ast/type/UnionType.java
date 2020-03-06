@@ -36,6 +36,8 @@ import com.github.javaparser.metamodel.UnionTypeMetaModel;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.resolution.types.ResolvedUnionType;
+
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.Optional;
 import com.github.javaparser.ast.Generated;
@@ -133,7 +135,12 @@ public class UnionType extends Type implements NodeWithAnnotations<UnionType> {
 
     @Override
     public String asString() {
-        return elements.stream().map(Type::asString).collect(joining("|"));
+        StringJoiner joiner = new StringJoiner("|");
+        for (ReferenceType element : elements) {
+            String asString = element.asString();
+            joiner.add(asString);
+        }
+        return joiner.toString();
     }
 
     @Override

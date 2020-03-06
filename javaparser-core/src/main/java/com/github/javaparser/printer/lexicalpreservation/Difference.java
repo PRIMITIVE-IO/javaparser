@@ -246,7 +246,15 @@ public class Difference {
                         nodeTextIndexToPreviousCSMIndex.put(value, i);
                     }
                 }
-                int lastNodeTextIndex = nodeTextIndexOfPreviousElements.stream().max(Integer::compareTo).orElse(-1);
+                boolean seen = false;
+                Integer best = null;
+                for (Integer nodeTextIndexOfPreviousElement : nodeTextIndexOfPreviousElements) {
+                    if (!seen || nodeTextIndexOfPreviousElement.compareTo(best) > 0) {
+                        seen = true;
+                        best = nodeTextIndexOfPreviousElement;
+                    }
+                }
+                int lastNodeTextIndex = seen ? best : -1;
 
                 // Elements to be added at the end
                 List<CsmElement> elementsToBeAddedAtTheEnd = new LinkedList<>();
@@ -801,8 +809,16 @@ public class Difference {
             }
 
             // Prioritize the matches from best to worst
-            Optional<MatchClassification> bestMatchKey = potentialMatches.keySet().stream()
-                    .min(Comparator.comparing(MatchClassification::getPriority));
+            boolean seen = false;
+            MatchClassification best = null;
+            Comparator<MatchClassification> comparator = Comparator.comparing(MatchClassification::getPriority);
+            for (MatchClassification matchClassification : potentialMatches.keySet()) {
+                if (!seen || comparator.compare(matchClassification, best) < 0) {
+                    seen = true;
+                    best = matchClassification;
+                }
+            }
+            Optional<MatchClassification> bestMatchKey = seen ? Optional.of(best) : Optional.empty();
 
             if (bestMatchKey.isPresent()) {
                 correspondingIndices.add(potentialMatches.get(bestMatchKey.get()));

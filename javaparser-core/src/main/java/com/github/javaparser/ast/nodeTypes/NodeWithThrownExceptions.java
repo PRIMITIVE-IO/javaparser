@@ -85,6 +85,11 @@ public interface NodeWithThrownExceptions<N extends Node> {
      * @return true if found in throws clause, false if not
      */
     default boolean isThrown(String throwableName) {
-        return getThrownExceptions().stream().anyMatch(t -> t.toString().equals(throwableName));
+        for (ReferenceType t : getThrownExceptions()) {
+            if (t.toString().equals(throwableName)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

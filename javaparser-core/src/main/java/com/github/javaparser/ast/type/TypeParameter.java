@@ -38,6 +38,8 @@ import com.github.javaparser.metamodel.TypeParameterMetaModel;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.resolution.types.ResolvedTypeVariable;
+
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.Optional;
 import com.github.javaparser.ast.Generated;
@@ -172,7 +174,14 @@ public class TypeParameter extends ReferenceType implements NodeWithSimpleName<T
     @Override
     public String asString() {
         StringBuilder str = new StringBuilder(getNameAsString());
-        getTypeBound().ifNonEmpty(l -> str.append(l.stream().map(ClassOrInterfaceType::asString).collect(joining("&", " extends ", ""))));
+        getTypeBound().ifNonEmpty(l -> {
+            StringJoiner joiner = new StringJoiner("&", " extends ", "");
+            for (ClassOrInterfaceType classOrInterfaceType : l) {
+                String asString = classOrInterfaceType.asString();
+                joiner.add(asString);
+            }
+            str.append(joiner.toString());
+        });
         return str.toString();
     }
 

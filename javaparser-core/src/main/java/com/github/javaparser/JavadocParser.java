@@ -25,9 +25,8 @@ import com.github.javaparser.ast.comments.JavadocComment;
 import com.github.javaparser.javadoc.Javadoc;
 import com.github.javaparser.javadoc.JavadocBlockTag;
 import com.github.javaparser.javadoc.description.JavadocDescription;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -48,11 +47,15 @@ class JavadocParser {
 
     public static Javadoc parse(String commentContent) {
         List<String> cleanLines = cleanLines(normalizeEolInTextBlock(commentContent, EOL));
-        int indexOfFirstBlockTag = cleanLines.stream()
-                .filter(JavadocParser::isABlockLine)
-                .map(cleanLines::indexOf)
-                .findFirst()
-                .orElse(-1);
+        Integer found = -1;
+        for (String cleanLine : cleanLines) {
+            if (isABlockLine(cleanLine)) {
+                Integer indexOf = cleanLines.indexOf(cleanLine);
+                found = indexOf;
+                break;
+            }
+        }
+        int indexOfFirstBlockTag = found;
         List<String> blockLines;
         String descriptionText;
         if (indexOfFirstBlockTag == -1) {
@@ -63,9 +66,11 @@ class JavadocParser {
 
             //Combine cleaned lines, but only starting with the first block tag till the end
             //In this combined string it is easier to handle multiple lines which actually belong together
-            String tagBlock = cleanLines.subList(indexOfFirstBlockTag, cleanLines.size())
-                .stream()
-                .collect(Collectors.joining(EOL));
+            StringJoiner joiner = new StringJoiner(EOL);
+            for (String s2 : cleanLines.subList(indexOfFirstBlockTag, cleanLines.size())) {
+                joiner.add(s2);
+            }
+            String tagBlock = joiner.toString();
 
             //Split up the entire tag back again, considering now that some lines belong to the same block tag.
             //The pattern splits the block at each new line starting with the '@' symbol, thus the symbol
@@ -77,7 +82,9 @@ class JavadocParser {
                 .collect(Collectors.toList());
         }
         Javadoc document = new Javadoc(JavadocDescription.parseText(descriptionText));
-        blockLines.forEach(l -> document.addBlockTag(parseBlockTag(l)));
+        for (String l : blockLines) {
+            document.addBlockTag(parseBlockTag(l));
+        }
         return document;
     }
 
@@ -123,7 +130,12 @@ class JavadocParser {
             }
         }).collect(Collectors.toList());
         // lines containing only whitespace are normalized to empty lines
-        cleanedLines = cleanedLines.stream().map(l -> l.trim().isEmpty() ? "" : l).collect(Collectors.toList());
+        List<String> list = new ArrayList<>();
+        for (String l : cleanedLines) {
+            String s = l.trim().isEmpty() ? "" : l;
+            list.add(s);
+        }
+        cleanedLines = list;
         // if the first starts with a space, remove it
         if (!cleanedLines.get(0).isEmpty() && (cleanedLines.get(0).charAt(0) == ' ' || cleanedLines.get(0).charAt(0) == '\t')) {
             cleanedLines.set(0, cleanedLines.get(0).substring(1));

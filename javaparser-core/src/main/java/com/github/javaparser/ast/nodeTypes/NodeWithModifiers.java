@@ -55,7 +55,13 @@ public interface NodeWithModifiers<N extends Node> {
     default N addModifier(Modifier.Keyword... newModifiers) {
         NodeList<Modifier> existingModifiers = new NodeList<>(getModifiers());
         for (Modifier.Keyword newModifier : newModifiers) {
-            boolean alreadyPresent = existingModifiers.stream().anyMatch(m -> m.getKeyword() == newModifier);
+            boolean alreadyPresent = false;
+            for (Modifier m : existingModifiers) {
+                if (m.getKeyword() == newModifier) {
+                    alreadyPresent = true;
+                    break;
+                }
+            }
             if (!alreadyPresent) {
                 existingModifiers.add(new Modifier(newModifier));
             }

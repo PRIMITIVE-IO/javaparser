@@ -65,6 +65,8 @@ public class PostProcessors implements PostProcessor {
 
     @Override
     public void process(ParseResult<? extends Node> result, ParserConfiguration configuration) {
-        postProcessors.forEach(pp -> pp.process(result, configuration));
+        for (PostProcessor pp : postProcessors) {
+            pp.process(result, configuration);
+        }
     }
 }

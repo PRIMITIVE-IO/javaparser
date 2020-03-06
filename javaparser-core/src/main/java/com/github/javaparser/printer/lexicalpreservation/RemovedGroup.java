@@ -27,6 +27,7 @@ import com.github.javaparser.TokenTypes;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmToken;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -94,9 +95,13 @@ final class RemovedGroup implements Iterable<Removed> {
     }
 
     private List<Integer> getIndicesBeingRemoved() {
-        return IntStream.range(firstElementIndex, firstElementIndex + removedList.size())
-                .boxed()
-                .collect(Collectors.toList());
+        List<Integer> list = new ArrayList<>();
+        int bound = firstElementIndex + removedList.size();
+        for (int i = firstElementIndex; i < bound; i++) {
+            Integer integer = i;
+            list.add(integer);
+        }
+        return list;
     }
 
     /**

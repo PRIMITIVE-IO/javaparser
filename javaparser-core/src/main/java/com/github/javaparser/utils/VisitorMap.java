@@ -26,10 +26,7 @@ import com.github.javaparser.ast.visitor.GenericVisitor;
 import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -127,9 +124,12 @@ public class VisitorMap<N extends Node, V> implements Map<N, V> {
 
     @Override
     public Set<N> keySet() {
-        return innerMap.keySet().stream()
-                .map(k -> k.overridden)
-                .collect(Collectors.toSet());
+        Set<N> set = new HashSet<>();
+        for (EqualsHashcodeOverridingFacade k : innerMap.keySet()) {
+            N overridden = k.overridden;
+            set.add(overridden);
+        }
+        return set;
     }
 
     @Override
@@ -139,8 +139,11 @@ public class VisitorMap<N extends Node, V> implements Map<N, V> {
 
     @Override
     public Set<Entry<N, V>> entrySet() {
-        return innerMap.entrySet().stream()
-                .map(e -> new HashMap.SimpleEntry<>(e.getKey().overridden, e.getValue()))
-                .collect(Collectors.toSet());
+        Set<Entry<N, V>> set = new HashSet<>();
+        for (Entry<EqualsHashcodeOverridingFacade, V> e : innerMap.entrySet()) {
+            AbstractMap.SimpleEntry<N, V> nvSimpleEntry = new HashMap.SimpleEntry<>(e.getKey().overridden, e.getValue());
+            set.add(nvSimpleEntry);
+        }
+        return set;
     }
 }

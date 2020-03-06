@@ -122,7 +122,13 @@ public interface ResolvedReferenceTypeDeclaration extends ResolvedTypeDeclaratio
      * Bar I should get a FieldDeclaration with type String.
      */
     default ResolvedFieldDeclaration getField(String name) {
-        Optional<ResolvedFieldDeclaration> field = this.getAllFields().stream().filter(f -> f.getName().equals(name)).findFirst();
+        Optional<ResolvedFieldDeclaration> field = Optional.empty();
+        for (ResolvedFieldDeclaration f : this.getAllFields()) {
+            if (f.getName().equals(name)) {
+                field = Optional.of(f);
+                break;
+            }
+        }
         if (field.isPresent()) {
             return field.get();
         } else {
@@ -134,7 +140,13 @@ public interface ResolvedReferenceTypeDeclaration extends ResolvedTypeDeclaratio
      * Consider only field or inherited field which is not private.
      */
     default ResolvedFieldDeclaration getVisibleField(String name) {
-        Optional<ResolvedFieldDeclaration> field = getVisibleFields().stream().filter(f -> f.getName().equals(name)).findFirst();
+        Optional<ResolvedFieldDeclaration> field = Optional.empty();
+        for (ResolvedFieldDeclaration f : getVisibleFields()) {
+            if (f.getName().equals(name)) {
+                field = Optional.of(f);
+                break;
+            }
+        }
         if (field.isPresent()) {
             return field.get();
         } else {
@@ -146,14 +158,24 @@ public interface ResolvedReferenceTypeDeclaration extends ResolvedTypeDeclaratio
      * Has this type a field with the given name?
      */
     default boolean hasField(String name) {
-        return this.getAllFields().stream().anyMatch(f -> f.getName().equals(name));
+        for (ResolvedFieldDeclaration f : this.getAllFields()) {
+            if (f.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
      * Either a declared field or inherited field which is not private.
      */
     default boolean hasVisibleField(String name) {
-        return getVisibleFields().stream().anyMatch(f -> f.getName().equals(name));
+        for (ResolvedFieldDeclaration f : getVisibleFields()) {
+            if (f.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -165,31 +187,53 @@ public interface ResolvedReferenceTypeDeclaration extends ResolvedTypeDeclaratio
      * Return a list of all fields declared and the inherited ones which are not private.
      */
     default List<ResolvedFieldDeclaration> getVisibleFields() {
-        return getAllFields().stream()
-                       .filter(f -> f.declaringType().equals(this) || f.accessSpecifier() != AccessSpecifier.PRIVATE)
-                       .collect(Collectors.toList());
+        List<ResolvedFieldDeclaration> list = new ArrayList<>();
+        for (ResolvedFieldDeclaration f : getAllFields()) {
+            if (f.declaringType().equals(this) || f.accessSpecifier() != AccessSpecifier.PRIVATE) {
+                list.add(f);
+            }
+        }
+        return list;
     }
 
     /**
      * Return a list of all the non static fields, either declared or inherited.
      */
     default List<ResolvedFieldDeclaration> getAllNonStaticFields() {
-        return getAllFields().stream().filter(it -> !it.isStatic()).collect(Collectors.toList());
+        List<ResolvedFieldDeclaration> list = new ArrayList<>();
+        for (ResolvedFieldDeclaration it : getAllFields()) {
+            if (!it.isStatic()) {
+                list.add(it);
+            }
+        }
+        return list;
     }
 
     /**
      * Return a list of all the static fields, either declared or inherited.
      */
     default List<ResolvedFieldDeclaration> getAllStaticFields() {
-        return getAllFields().stream().filter(it -> it.isStatic()).collect(Collectors.toList());
+        List<ResolvedFieldDeclaration> list = new ArrayList<>();
+        for (ResolvedFieldDeclaration it : getAllFields()) {
+            if (it.isStatic()) {
+                list.add(it);
+            }
+        }
+        return list;
     }
 
     /**
      * Return a list of all the fields declared in this type.
      */
     default List<ResolvedFieldDeclaration> getDeclaredFields() {
-        return getAllFields().stream().filter(it -> it.declaringType().getQualifiedName()
-                                                            .equals(getQualifiedName())).collect(Collectors.toList());
+        List<ResolvedFieldDeclaration> list = new ArrayList<>();
+        for (ResolvedFieldDeclaration it : getAllFields()) {
+            if (it.declaringType().getQualifiedName()
+                    .equals(getQualifiedName())) {
+                list.add(it);
+            }
+        }
+        return list;
     }
 
     ///
@@ -247,7 +291,12 @@ public interface ResolvedReferenceTypeDeclaration extends ResolvedTypeDeclaratio
         if (hasDirectlyAnnotation(qualifiedName)) {
             return true;
         }
-        return getAllAncestors().stream().anyMatch(it -> it.asReferenceType().getTypeDeclaration().hasDirectlyAnnotation(qualifiedName));
+        for (ResolvedReferenceType it : getAllAncestors()) {
+            if (it.asReferenceType().getTypeDeclaration().hasDirectlyAnnotation(qualifiedName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

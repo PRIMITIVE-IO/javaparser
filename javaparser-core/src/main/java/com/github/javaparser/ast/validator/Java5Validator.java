@@ -49,11 +49,13 @@ public class Java5Validator extends Java1_4Validator {
     protected final Validator noPrimitiveGenericArguments = new TreeVisitorValidator((node, reporter) -> {
         if (node instanceof NodeWithTypeArguments) {
             Optional<NodeList<Type>> typeArguments = ((NodeWithTypeArguments<? extends Node>) node).getTypeArguments();
-            typeArguments.ifPresent(types -> types.forEach(ty -> {
-                if (ty instanceof PrimitiveType) {
-                    reporter.report(node, "Type arguments may not be primitive.");
+            typeArguments.ifPresent(types -> {
+                for (Type ty : types) {
+                    if (ty instanceof PrimitiveType) {
+                        reporter.report(node, "Type arguments may not be primitive.");
+                    }
                 }
-            }));
+            });
         }
     });
 

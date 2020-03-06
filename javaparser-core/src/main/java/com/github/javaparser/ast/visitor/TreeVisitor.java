@@ -50,7 +50,9 @@ public abstract class TreeVisitor {
      */
     public void visitPreOrder(Node node) {
         process(node);
-        new ArrayList<>(node.getChildNodes()).forEach(this::visitPreOrder);
+        for (Node node1 : new ArrayList<>(node.getChildNodes())) {
+            visitPreOrder(node1);
+        }
     }
 
     /**
@@ -61,7 +63,9 @@ public abstract class TreeVisitor {
      * @see <a href="https://en.wikipedia.org/wiki/Post-order">Post-order traversal</a>
      */
     public void visitPostOrder(Node node) {
-        new ArrayList<>(node.getChildNodes()).forEach(this::visitPostOrder);
+        for (Node node1 : new ArrayList<>(node.getChildNodes())) {
+            visitPostOrder(node1);
+        }
         process(node);
     }
 
@@ -93,6 +97,8 @@ public abstract class TreeVisitor {
      * Performs a simple traversal over all nodes that have the passed node as their parent.
      */
     public void visitDirectChildren(Node node) {
-        new ArrayList<>(node.getChildNodes()).forEach(this::process);
+        for (Node node1 : new ArrayList<>(node.getChildNodes())) {
+            process(node1);
+        }
     }
 }

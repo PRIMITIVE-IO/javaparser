@@ -211,7 +211,9 @@ class DifferenceElementCalculator {
                 if ((nextOriginal instanceof CsmMix) && (nextAfter instanceof CsmMix)) {
                     if (((CsmMix) nextAfter).getElements().equals(((CsmMix) nextOriginal).getElements())) {
                         // No reason to deal with a reshuffled, we are just going to keep everything as it is
-                        ((CsmMix) nextAfter).getElements().forEach(el -> elements.add(new Kept(el)));
+                        for (CsmElement el : ((CsmMix) nextAfter).getElements()) {
+                            elements.add(new Kept(el));
+                        }
                     } else {
                         elements.add(new Reshuffled((CsmMix)nextOriginal, (CsmMix)nextAfter));
                     }
@@ -248,7 +250,13 @@ class DifferenceElementCalculator {
     }
 
     private static long cost(List<DifferenceElement> elements) {
-        return elements.stream().filter(e -> !(e instanceof Kept)).count();
+        long count = 0L;
+        for (DifferenceElement e : elements) {
+            if (!(e instanceof Kept)) {
+                count++;
+            }
+        }
+        return count;
     }
 
 

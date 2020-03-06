@@ -26,7 +26,9 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.type.Type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -107,8 +109,12 @@ public interface NodeWithParameters<N extends Node> {
      * @return null if not found, the param found otherwise
      */
     default Optional<Parameter> getParameterByName(String name) {
-        return getParameters().stream()
-                .filter(p -> p.getNameAsString().equals(name)).findFirst();
+        for (Parameter p : getParameters()) {
+            if (p.getNameAsString().equals(name)) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -118,8 +124,12 @@ public interface NodeWithParameters<N extends Node> {
      * @return null if not found, the param found otherwise
      */
     default Optional<Parameter> getParameterByType(String type) {
-        return getParameters().stream()
-                .filter(p -> p.getType().toString().equals(type)).findFirst();
+        for (Parameter p : getParameters()) {
+            if (p.getType().toString().equals(type)) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -129,8 +139,12 @@ public interface NodeWithParameters<N extends Node> {
      * @return null if not found, the param found otherwise
      */
     default Optional<Parameter> getParameterByType(Class<?> type) {
-        return getParameters().stream()
-                .filter(p -> p.getType().toString().equals(type.getSimpleName())).findFirst();
+        for (Parameter p : getParameters()) {
+            if (p.getType().toString().equals(type.getSimpleName())) {
+                return Optional.of(p);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -149,9 +163,12 @@ public interface NodeWithParameters<N extends Node> {
      * @return {@code true} if all parameters match one by one, in the given order.
      */
     default boolean hasParametersOfType(String... paramTypes) {
-        return getParameters().stream()
-                .map(p -> p.getType().asString())
-                .collect(toList())
+        List<String> list = new ArrayList<>();
+        for (Parameter p : getParameters()) {
+            String s = p.getType().asString();
+            list.add(s);
+        }
+        return list
                 .equals(Arrays.asList(paramTypes));
     }
 
@@ -168,13 +185,20 @@ public interface NodeWithParameters<N extends Node> {
      * @return {@code true} if all parameters match one by one, in the given order.
      */
     default boolean hasParametersOfType(Class<?>... paramTypes) {
-        return getParameters().stream()
-                // if p.getType() is a class or interface type, we want to consider its erasure, i.e., if the parameter
-                // is "List<String>", we want to consider it as "List", so we need to call getName()
-                .map(p -> p.getType().toClassOrInterfaceType()
-                        .map(NodeWithSimpleName::getNameAsString)
-                        .orElse(p.getType().asString()))
-                .collect(toList())
-                .equals(Stream.of(paramTypes).map(Class::getSimpleName).collect(toList()));
+        List<String> list = new ArrayList<>();
+        for (Class<?> paramType : paramTypes) {
+            String simpleName = paramType.getSimpleName();
+            list.add(simpleName);
+        }// if p.getType() is a class or interface type, we want to consider its erasure, i.e., if the parameter
+// is "List<String>", we want to consider it as "List", so we need to call getName()
+        List<String> result = new ArrayList<>();
+        for (Parameter p : getParameters()) {
+            String s = p.getType().toClassOrInterfaceType()
+                    .map(NodeWithSimpleName::getNameAsString)
+                    .orElse(p.getType().asString());
+            result.add(s);
+        }
+        return result
+                .equals(list);
     }
 }

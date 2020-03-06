@@ -22,6 +22,7 @@
 package com.github.javaparser.ast.validator;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.validator.chunks.ModifierValidator;
 
 /**
@@ -32,11 +33,11 @@ public class Java8Validator extends Java7Validator {
     final Validator defaultMethodsInInterface = new SingleNodeTypeValidator<>(ClassOrInterfaceDeclaration.class,
             (n, reporter) -> {
                 if (n.isInterface()) {
-                    n.getMethods().forEach(m -> {
+                    for (MethodDeclaration m : n.getMethods()) {
                         if (m.isDefault() && !m.getBody().isPresent()) {
                             reporter.report(m, "'default' methods must have a body.");
                         }
-                    });
+                    }
                 }
             }
     );

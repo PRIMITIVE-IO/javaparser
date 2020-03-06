@@ -148,7 +148,19 @@ public class TextBlockLiteralExpr extends LiteralStringValueExpr {
         /* If the last line in the list of individual lines (i.e., the line with the closing delimiter) is blank, then add it to the set of determining lines. 
         (The indentation of the closing delimiter should influence the indentation of the content as a whole -- a "significant trailing line" policy.) */
         /* Compute the common white space prefix of the set of determining lines, by counting the number of leading white space characters on each line and taking the minimum count. */
-        int commonWhiteSpacePrefixSize = range(0, rawLines.length).mapToObj(nr -> new Pair<>(nr, rawLines[nr])).filter(l -> !emptyOrWhitespace(l.b) || isLastLine(rawLines, l.a)).map(l -> indentSize(l.b)).min(Integer::compare).orElse(0);
+        boolean seen = false;
+        Integer best = null;
+        for (int nr = 0; nr < rawLines.length; nr++) {
+            Pair<Integer, String> integerStringPair = new Pair<>(nr, rawLines[nr]);
+            if (!emptyOrWhitespace(integerStringPair.b) || isLastLine(rawLines, integerStringPair.a)) {
+                Integer indentSize = indentSize(integerStringPair.b);
+                if (!seen || Integer.compare(indentSize, best) < 0) {
+                    seen = true;
+                    best = indentSize;
+                }
+            }
+        }
+        int commonWhiteSpacePrefixSize = seen ? best : 0;
         /* Remove the common white space prefix from each non-blank line in the list of individual lines. */
         /* Remove all trailing white space from all lines in the modified list of individual lines from step 5. 
         This step collapses wholly-whitespace lines in the modified list so that they are empty, but does not discard them. */

@@ -88,10 +88,10 @@ public class Javadoc {
         if (!blockTags.isEmpty()) {
             sb.append(EOL);
         }
-        blockTags.forEach(bt -> {
+        for (JavadocBlockTag bt : blockTags) {
             sb.append(bt.toText());
             sb.append(EOL);
-        });
+        }
         return sb.toString();
     }
 

@@ -48,7 +48,10 @@ public class ResolvedUnionType implements ResolvedType {
                     common.retainAll(b);
                     return common;
                 });
-        return reduce.orElse(new ArrayList<>()).stream().findFirst();
+        for (ResolvedReferenceType resolvedReferenceType : reduce.orElse(new ArrayList<>())) {
+            return Optional.of(resolvedReferenceType);
+        }
+        return Optional.empty();
     }
 
     @Override
@@ -68,12 +71,22 @@ public class ResolvedUnionType implements ResolvedType {
 
     @Override
     public String describe() {
-        return String.join(" | ", elements.stream().map(ResolvedType::describe).collect(Collectors.toList()));
+        List<String> list = new ArrayList<>();
+        for (ResolvedType element : elements) {
+            String describe = element.describe();
+            list.add(describe);
+        }
+        return String.join(" | ", list);
     }
 
     @Override
     public boolean isAssignableBy(ResolvedType other) {
-        return elements.stream().allMatch(e -> e.isAssignableBy(other));
+        for (ResolvedType e : elements) {
+            if (!e.isAssignableBy(other)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override

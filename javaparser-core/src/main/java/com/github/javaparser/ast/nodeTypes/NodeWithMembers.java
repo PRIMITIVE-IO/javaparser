@@ -29,6 +29,7 @@ import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.VoidType;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -315,9 +316,13 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the methods found (multiple in case of overloading)
      */
     default List<MethodDeclaration> getMethodsByName(String name) {
-        return unmodifiableList(getMethods().stream()
-                .filter(m -> m.getNameAsString().equals(name))
-                .collect(toList()));
+        List<MethodDeclaration> list = new ArrayList<>();
+        for (MethodDeclaration m : getMethods()) {
+            if (m.getNameAsString().equals(name)) {
+                list.add(m);
+            }
+        }
+        return unmodifiableList(list);
     }
 
     /**
@@ -326,10 +331,14 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the methods found. This list is immutable.
      */
     default List<MethodDeclaration> getMethods() {
-        return unmodifiableList(getMembers().stream()
-                .filter(m -> m instanceof MethodDeclaration)
-                .map(m -> (MethodDeclaration) m)
-                .collect(toList()));
+        List<MethodDeclaration> list = new ArrayList<>();
+        for (BodyDeclaration<?> m : getMembers()) {
+            if (m instanceof MethodDeclaration) {
+                MethodDeclaration methodDeclaration = (MethodDeclaration) m;
+                list.add(methodDeclaration);
+            }
+        }
+        return unmodifiableList(list);
     }
 
     /**
@@ -348,9 +357,13 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the methods found
      */
     default List<MethodDeclaration> getMethodsByParameterTypes(String... paramTypes) {
-        return unmodifiableList(getMethods().stream()
-                .filter(m -> m.hasParametersOfType(paramTypes))
-                .collect(toList()));
+        List<MethodDeclaration> list = new ArrayList<>();
+        for (MethodDeclaration m : getMethods()) {
+            if (m.hasParametersOfType(paramTypes)) {
+                list.add(m);
+            }
+        }
+        return unmodifiableList(list);
     }
 
     /**
@@ -362,9 +375,13 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the methods found
      */
     default List<MethodDeclaration> getMethodsBySignature(String name, String... paramTypes) {
-        return unmodifiableList(getMethodsByName(name).stream()
-                .filter(m -> m.hasParametersOfType(paramTypes))
-                .collect(toList()));
+        List<MethodDeclaration> list = new ArrayList<>();
+        for (MethodDeclaration m : getMethodsByName(name)) {
+            if (m.hasParametersOfType(paramTypes)) {
+                list.add(m);
+            }
+        }
+        return unmodifiableList(list);
     }
 
     /**
@@ -380,9 +397,13 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the methods found
      */
     default List<MethodDeclaration> getMethodsByParameterTypes(Class<?>... paramTypes) {
-        return unmodifiableList(getMethods().stream()
-                .filter(m -> m.hasParametersOfType(paramTypes))
-                .collect(toList()));
+        List<MethodDeclaration> list = new ArrayList<>();
+        for (MethodDeclaration m : getMethods()) {
+            if (m.hasParametersOfType(paramTypes)) {
+                list.add(m);
+            }
+        }
+        return unmodifiableList(list);
     }
 
     /**
@@ -391,10 +412,14 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the constructors found. This list is immutable.
      */
     default List<ConstructorDeclaration> getConstructors() {
-        return unmodifiableList(getMembers().stream()
-                .filter(m -> m instanceof ConstructorDeclaration)
-                .map(m -> (ConstructorDeclaration) m)
-                .collect(toList()));
+        List<ConstructorDeclaration> list = new ArrayList<>();
+        for (BodyDeclaration<?> m : getMembers()) {
+            if (m instanceof ConstructorDeclaration) {
+                ConstructorDeclaration constructorDeclaration = (ConstructorDeclaration) m;
+                list.add(constructorDeclaration);
+            }
+        }
+        return unmodifiableList(list);
     }
 
     /**
@@ -403,11 +428,15 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the constructor found, if any.
      */
     default Optional<ConstructorDeclaration> getDefaultConstructor() {
-        return getMembers().stream()
-                .filter(m -> m instanceof ConstructorDeclaration)
-                .map(m -> (ConstructorDeclaration) m)
-                .filter(cd -> cd.getParameters().isEmpty())
-                .findFirst();
+        for (BodyDeclaration<?> m : getMembers()) {
+            if (m instanceof ConstructorDeclaration) {
+                ConstructorDeclaration cd = (ConstructorDeclaration) m;
+                if (cd.getParameters().isEmpty()) {
+                    return Optional.of(cd);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -427,9 +456,12 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the constructor found, if any.
      */
     default Optional<ConstructorDeclaration> getConstructorByParameterTypes(String... paramTypes) {
-        return getConstructors().stream()
-                .filter(m -> m.hasParametersOfType(paramTypes))
-                .findFirst();
+        for (ConstructorDeclaration m : getConstructors()) {
+            if (m.hasParametersOfType(paramTypes)) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -445,9 +477,12 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the constructor found, if any.
      */
     default Optional<ConstructorDeclaration> getConstructorByParameterTypes(Class<?>... paramTypes) {
-        return getConstructors().stream()
-                .filter(m -> m.hasParametersOfType(paramTypes))
-                .findFirst();
+        for (ConstructorDeclaration m : getConstructors()) {
+            if (m.hasParametersOfType(paramTypes)) {
+                return Optional.of(m);
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -457,12 +492,16 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return null if not found, the FieldDeclaration otherwise
      */
     default Optional<FieldDeclaration> getFieldByName(String name) {
-        return getMembers().stream()
-                .filter(m -> m instanceof FieldDeclaration)
-                .map(f -> (FieldDeclaration) f)
-                .filter(f -> f.getVariables().stream()
-                        .anyMatch(var -> var.getNameAsString().equals(name)))
-                .findFirst();
+        for (BodyDeclaration<?> m : getMembers()) {
+            if (m instanceof FieldDeclaration) {
+                FieldDeclaration f = (FieldDeclaration) m;
+                if (f.getVariables().stream()
+                        .anyMatch(var -> var.getNameAsString().equals(name))) {
+                    return Optional.of(f);
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     /**
@@ -471,10 +510,14 @@ public interface NodeWithMembers<N extends Node> extends NodeWithSimpleName<N> {
      * @return the fields found. This list is immutable.
      */
     default List<FieldDeclaration> getFields() {
-        return unmodifiableList(getMembers().stream()
-                .filter(m -> m instanceof FieldDeclaration)
-                .map(m -> (FieldDeclaration) m)
-                .collect(toList()));
+        List<FieldDeclaration> list = new ArrayList<>();
+        for (BodyDeclaration<?> m : getMembers()) {
+            if (m instanceof FieldDeclaration) {
+                FieldDeclaration fieldDeclaration = (FieldDeclaration) m;
+                list.add(fieldDeclaration);
+            }
+        }
+        return unmodifiableList(list);
     }
 
     /**

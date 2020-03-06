@@ -522,10 +522,14 @@ public class SourceRoot {
      * added manually.
      */
     public List<CompilationUnit> getCompilationUnits() {
-        return cache.values().stream()
-                .filter(ParseResult::isSuccessful)
-                .map(p -> p.getResult().get())
-                .collect(Collectors.toList());
+        List<CompilationUnit> list = new ArrayList<>();
+        for (ParseResult<CompilationUnit> p : cache.values()) {
+            if (p.isSuccessful()) {
+                CompilationUnit compilationUnit = p.getResult().get();
+                list.add(compilationUnit);
+            }
+        }
+        return list;
     }
 
     /**

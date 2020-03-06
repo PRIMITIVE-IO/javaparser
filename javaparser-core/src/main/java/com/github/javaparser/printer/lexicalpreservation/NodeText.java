@@ -179,7 +179,9 @@ class NodeText {
     String expand() {
         StringBuffer sb = new StringBuffer();
 
-        elements.forEach(e -> sb.append(e.expand()));
+        for (TextElement e : elements) {
+            sb.append(e.expand());
+        }
         return sb.toString();
     }
 

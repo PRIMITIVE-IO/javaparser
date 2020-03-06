@@ -250,8 +250,17 @@ public class CompilationUnit extends Node {
         if (importDeclaration.isAsterisk()) {
             getImports().removeIf(im -> Objects.equals(getImportPackageName(im).get(), getImportPackageName(importDeclaration).orElse(null)));
         }
-        if (!isImplicitImport(importDeclaration) && getImports().stream().noneMatch(im -> im.equals(importDeclaration) || (im.isAsterisk() && Objects.equals(getImportPackageName(im).get(), getImportPackageName(importDeclaration).orElse(null))))) {
-            getImports().add(importDeclaration);
+        if (!isImplicitImport(importDeclaration)) {
+            boolean b = true;
+            for (ImportDeclaration im : getImports()) {
+                if (im.equals(importDeclaration) || (im.isAsterisk() && Objects.equals(getImportPackageName(im).get(), getImportPackageName(importDeclaration).orElse(null)))) {
+                    b = false;
+                    break;
+                }
+            }
+            if (b) {
+                getImports().add(importDeclaration);
+            }
         }
         return this;
     }
@@ -498,7 +507,12 @@ public class CompilationUnit extends Node {
      * @param className the class name (case-sensitive)
      */
     public Optional<ClassOrInterfaceDeclaration> getClassByName(String className) {
-        return getTypes().stream().filter(type -> type.getNameAsString().equals(className) && type instanceof ClassOrInterfaceDeclaration && !((ClassOrInterfaceDeclaration) type).isInterface()).findFirst().map(t -> (ClassOrInterfaceDeclaration) t);
+        for (TypeDeclaration<?> type : getTypes()) {
+            if (type.getNameAsString().equals(className) && type instanceof ClassOrInterfaceDeclaration && !((ClassOrInterfaceDeclaration) type).isInterface()) {
+                return Optional.<TypeDeclaration<?>>of(type).map(t -> (ClassOrInterfaceDeclaration) t);
+            }
+        }
+        return Optional.<TypeDeclaration<?>>empty().map(t -> (ClassOrInterfaceDeclaration) t);
     }
 
     /**
@@ -507,7 +521,12 @@ public class CompilationUnit extends Node {
      * @param interfaceName the interface name (case-sensitive)
      */
     public Optional<ClassOrInterfaceDeclaration> getInterfaceByName(String interfaceName) {
-        return getTypes().stream().filter(type -> type.getNameAsString().equals(interfaceName) && type instanceof ClassOrInterfaceDeclaration && ((ClassOrInterfaceDeclaration) type).isInterface()).findFirst().map(t -> (ClassOrInterfaceDeclaration) t);
+        for (TypeDeclaration<?> type : getTypes()) {
+            if (type.getNameAsString().equals(interfaceName) && type instanceof ClassOrInterfaceDeclaration && ((ClassOrInterfaceDeclaration) type).isInterface()) {
+                return Optional.<TypeDeclaration<?>>of(type).map(t -> (ClassOrInterfaceDeclaration) t);
+            }
+        }
+        return Optional.<TypeDeclaration<?>>empty().map(t -> (ClassOrInterfaceDeclaration) t);
     }
 
     /**
@@ -516,7 +535,12 @@ public class CompilationUnit extends Node {
      * @param enumName the enum name (case-sensitive)
      */
     public Optional<EnumDeclaration> getEnumByName(String enumName) {
-        return getTypes().stream().filter(type -> type.getNameAsString().equals(enumName) && type instanceof EnumDeclaration).findFirst().map(t -> (EnumDeclaration) t);
+        for (TypeDeclaration<?> type : getTypes()) {
+            if (type.getNameAsString().equals(enumName) && type instanceof EnumDeclaration) {
+                return Optional.<TypeDeclaration<?>>of(type).map(t -> (EnumDeclaration) t);
+            }
+        }
+        return Optional.<TypeDeclaration<?>>empty().map(t -> (EnumDeclaration) t);
     }
 
     /**
@@ -533,7 +557,14 @@ public class CompilationUnit extends Node {
      * If for some strange reason there are multiple types of this name, the first one is returned.
      */
     public Optional<TypeDeclaration<?>> getPrimaryType() {
-        return getPrimaryTypeName().flatMap(name -> getTypes().stream().filter(t -> t.getNameAsString().equals(name)).findFirst());
+        return getPrimaryTypeName().flatMap(name -> {
+            for (TypeDeclaration<?> t : getTypes()) {
+                if (t.getNameAsString().equals(name)) {
+                    return Optional.of(t);
+                }
+            }
+            return Optional.empty();
+        });
     }
 
     /**
@@ -542,7 +573,12 @@ public class CompilationUnit extends Node {
      * @param annotationName the annotation name (case-sensitive)
      */
     public Optional<AnnotationDeclaration> getAnnotationDeclarationByName(String annotationName) {
-        return getTypes().stream().filter(type -> type.getNameAsString().equals(annotationName) && type instanceof AnnotationDeclaration).findFirst().map(t -> (AnnotationDeclaration) t);
+        for (TypeDeclaration<?> type : getTypes()) {
+            if (type.getNameAsString().equals(annotationName) && type instanceof AnnotationDeclaration) {
+                return Optional.<TypeDeclaration<?>>of(type).map(t -> (AnnotationDeclaration) t);
+            }
+        }
+        return Optional.<TypeDeclaration<?>>empty().map(t -> (AnnotationDeclaration) t);
     }
 
     @Override

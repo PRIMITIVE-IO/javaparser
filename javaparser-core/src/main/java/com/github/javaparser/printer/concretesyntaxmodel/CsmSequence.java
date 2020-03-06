@@ -34,8 +34,10 @@ public class CsmSequence implements CsmElement {
         if (elements == null) {
             throw new NullPointerException();
         }
-        if (elements.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException("Null element in the sequence");
+        for (CsmElement element : elements) {
+            if (element == null) {
+                throw new IllegalArgumentException("Null element in the sequence");
+            }
         }
         this.elements = elements;
     }
@@ -46,6 +48,8 @@ public class CsmSequence implements CsmElement {
 
     @Override
     public void prettyPrint(Node node, SourcePrinter printer) {
-        elements.forEach(e -> e.prettyPrint(node, printer));
+        for (CsmElement e : elements) {
+            e.prettyPrint(node, printer);
+        }
     }
 }

@@ -26,6 +26,7 @@ import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.metamodel.NodeMetaModel;
 import com.github.javaparser.metamodel.PropertyMetaModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.javaparser.utils.Utils.assertNotNull;
@@ -51,9 +52,28 @@ public class XmlPrinter {
         assertNotNull(node);
         NodeMetaModel metaModel = node.getMetaModel();
         List<PropertyMetaModel> allPropertyMetaModels = metaModel.getAllPropertyMetaModels();
-        List<PropertyMetaModel> attributes = allPropertyMetaModels.stream().filter(PropertyMetaModel::isAttribute).filter(PropertyMetaModel::isSingular).collect(toList());
-        List<PropertyMetaModel> subNodes = allPropertyMetaModels.stream().filter(PropertyMetaModel::isNode).filter(PropertyMetaModel::isSingular).collect(toList());
-        List<PropertyMetaModel> subLists = allPropertyMetaModels.stream().filter(PropertyMetaModel::isNodeList).collect(toList());
+        List<PropertyMetaModel> attributes = new ArrayList<>();
+        for (PropertyMetaModel model : allPropertyMetaModels) {
+            if (model.isAttribute()) {
+                if (model.isSingular()) {
+                    attributes.add(model);
+                }
+            }
+        }
+        List<PropertyMetaModel> subNodes = new ArrayList<>();
+        for (PropertyMetaModel propertyMetaModel : allPropertyMetaModels) {
+            if (propertyMetaModel.isNode()) {
+                if (propertyMetaModel.isSingular()) {
+                    subNodes.add(propertyMetaModel);
+                }
+            }
+        }
+        List<PropertyMetaModel> subLists = new ArrayList<>();
+        for (PropertyMetaModel allPropertyMetaModel : allPropertyMetaModels) {
+            if (allPropertyMetaModel.isNodeList()) {
+                subLists.add(allPropertyMetaModel);
+            }
+        }
 
         builder.append("<").append(name);
         if (outputNodeType) {

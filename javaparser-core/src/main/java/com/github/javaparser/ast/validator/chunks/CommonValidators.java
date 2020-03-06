@@ -22,6 +22,7 @@
 package com.github.javaparser.ast.validator.chunks;
 
 import com.github.javaparser.ast.NodeList;
+import com.github.javaparser.ast.body.BodyDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.InitializerDeclaration;
 import com.github.javaparser.ast.expr.*;
@@ -48,11 +49,11 @@ public class CommonValidators extends Validators {
                 ),
                 new SingleNodeTypeValidator<>(ClassOrInterfaceDeclaration.class, (n, reporter) -> {
                     if (n.isInterface()) {
-                        n.getMembers().forEach(mem -> {
+                        for (BodyDeclaration<?> mem : n.getMembers()) {
                             if (mem instanceof InitializerDeclaration) {
                                 reporter.report(mem, "An interface cannot have initializers.");
                             }
-                        });
+                        }
                     }
                 }
                 ),

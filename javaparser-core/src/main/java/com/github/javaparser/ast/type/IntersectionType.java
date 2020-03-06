@@ -36,6 +36,8 @@ import static com.github.javaparser.utils.Utils.assertNotNull;
 import static java.util.stream.Collectors.joining;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.resolution.types.ResolvedIntersectionType;
+
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import java.util.Optional;
 import com.github.javaparser.ast.Generated;
@@ -124,7 +126,12 @@ public class IntersectionType extends Type implements NodeWithAnnotations<Inters
 
     @Override
     public String asString() {
-        return elements.stream().map(Type::asString).collect(joining("&"));
+        StringJoiner joiner = new StringJoiner("&");
+        for (ReferenceType element : elements) {
+            String asString = element.asString();
+            joiner.add(asString);
+        }
+        return joiner.toString();
     }
 
     @Override

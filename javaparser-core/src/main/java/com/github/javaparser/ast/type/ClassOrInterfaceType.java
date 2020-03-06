@@ -40,6 +40,8 @@ import static java.util.stream.Collectors.joining;
 import com.github.javaparser.TokenRange;
 import com.github.javaparser.metamodel.OptionalProperty;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
+
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 import com.github.javaparser.ast.Generated;
 
@@ -223,7 +225,14 @@ public class ClassOrInterfaceType extends ReferenceType implements NodeWithSimpl
         StringBuilder str = new StringBuilder();
         getScope().ifPresent(s -> str.append(s.asString()).append("."));
         str.append(name.asString());
-        getTypeArguments().ifPresent(ta -> str.append(ta.stream().map(Type::asString).collect(joining(",", "<", ">"))));
+        getTypeArguments().ifPresent(ta -> {
+            StringJoiner joiner = new StringJoiner(",", "<", ">");
+            for (Type type : ta) {
+                String asString = type.asString();
+                joiner.add(asString);
+            }
+            str.append(joiner.toString());
+        });
         return str.toString();
     }
 

@@ -251,12 +251,22 @@ public class VisitorList<N extends Node> implements List<N> {
 
     @Override
     public Object[] toArray() {
-        return innerList.stream().map(facade -> facade.overridden).collect(Collectors.toList()).toArray();
+        List<N> list = new ArrayList<>();
+        for (EqualsHashcodeOverridingFacade facade : innerList) {
+            N overridden = facade.overridden;
+            list.add(overridden);
+        }
+        return list.toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] arr) {
-        return innerList.stream().map(facade -> facade.overridden).collect(Collectors.toList()).toArray(arr);
+        List<N> list = new ArrayList<>();
+        for (EqualsHashcodeOverridingFacade facade : innerList) {
+            N overridden = facade.overridden;
+            list.add(overridden);
+        }
+        return list.toArray(arr);
     }
 
     @Override

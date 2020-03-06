@@ -73,7 +73,13 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
     private void printModifiers(final NodeList<Modifier> modifiers) {
         if (modifiers.size() > 0) {
-            printer.print(modifiers.stream().map(Modifier::getKeyword).map(Modifier.Keyword::asString).collect(joining(" ")) + " ");
+            StringJoiner joiner = new StringJoiner(" ");
+            for (Modifier modifier : modifiers) {
+                Modifier.Keyword keyword = modifier.getKeyword();
+                String asString = keyword.asString();
+                joiner.add(asString);
+            }
+            printer.print(joiner.toString() + " ");
         }
     }
 
@@ -337,7 +343,13 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
 
             boolean skippingLeadingEmptyLines = true;
             boolean prependEmptyLine = false;
-            boolean prependSpace = strippedLines.stream().anyMatch(line -> !line.isEmpty() && !line.startsWith(" "));
+            boolean prependSpace = false;
+            for (String strippedLine : strippedLines) {
+                if (!strippedLine.isEmpty() && !strippedLine.startsWith(" ")) {
+                    prependSpace = true;
+                    break;
+                }
+            }
             for (String line : strippedLines) {
                 if (line.isEmpty()) {
                     if (!skippingLeadingEmptyLines) {

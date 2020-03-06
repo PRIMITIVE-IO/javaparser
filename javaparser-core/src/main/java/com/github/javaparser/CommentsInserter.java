@@ -28,10 +28,7 @@ import com.github.javaparser.ast.comments.Comment;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.utils.PositionUtils;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.TreeSet;
+import java.util.*;
 
 import static com.github.javaparser.ast.Node.NODE_BY_BEGIN_POSITION;
 import static java.util.stream.Collectors.*;
@@ -93,18 +90,27 @@ class CommentsInserter {
             If they preceed a child they are assigned to it, otherwise they remain "orphans"
          */
 
-        List<Node> children = node.getChildNodes().stream()
-                // Never attribute comments to modifiers.
-                .filter(n -> !(n instanceof Modifier))
-                .collect(toList());
+        // Never attribute comments to modifiers.
+        List<Node> children = new ArrayList<>();
+        for (Node n : node.getChildNodes()) {
+            if (!(n instanceof Modifier)) {
+                children.add(n);
+            }
+        }
 
         for (Node child : children) {
             TreeSet<Comment> commentsInsideChild = new TreeSet<>(NODE_BY_BEGIN_POSITION);
+            List<Comment> list = new ArrayList<>();
+            for (Comment c : commentsToAttribute) {
+                if (c.getRange().isPresent()) {
+                    if (PositionUtils.nodeContains(child, c,
+                            configuration.isIgnoreAnnotationsWhenAttributingComments())) {
+                        list.add(c);
+                    }
+                }
+            }
             commentsInsideChild.addAll(
-                    commentsToAttribute.stream()
-                            .filter(c -> c.getRange().isPresent())
-                            .filter(c -> PositionUtils.nodeContains(child, c,
-                                    configuration.isIgnoreAnnotationsWhenAttributingComments())).collect(toList()));
+                    list);
             commentsToAttribute.removeAll(commentsInsideChild);
             insertComments(child, commentsInsideChild);
         }
@@ -165,12 +171,11 @@ class CommentsInserter {
         /* I can attribute in line comments to elements preceeding them, if
          there is something contained in their line */
         List<Comment> attributedComments = new LinkedList<>();
-        commentsToAttribute.stream()
-                .filter(comment -> comment.getRange().isPresent())
-                .filter(Comment::isLineComment)
-                .forEach(comment -> children.stream()
-                        .filter(child -> child.getRange().isPresent())
-                        .forEach(child -> {
+        for (Comment comment : commentsToAttribute) {
+            if (comment.getRange().isPresent()) {
+                if (comment.isLineComment()) {
+                    for (Node child : children) {
+                        if (child.getRange().isPresent()) {
                             Range commentRange = comment.getRange().get();
                             Range childRange = child.getRange().get();
                             if (childRange.end.line == commentRange.begin.line
@@ -178,7 +183,11 @@ class CommentsInserter {
                                     comment.asLineComment())) {
                                 attributedComments.add(comment);
                             }
-                        }));
+                        }
+                    }
+                }
+            }
+        }
         commentsToAttribute.removeAll(attributedComments);
     }
 

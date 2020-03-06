@@ -52,7 +52,13 @@ public interface ResolvedTypeDeclaration extends ResolvedDeclaration {
      */
     default ResolvedReferenceTypeDeclaration getInternalType(String name) {
         Optional<ResolvedReferenceTypeDeclaration> type =
-                this.internalTypes().stream().filter(f -> f.getName().equals(name)).findFirst();
+                Optional.empty();
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().equals(name)) {
+                type = Optional.of(f);
+                break;
+            }
+        }
         return type.orElseThrow(() ->
                 new UnsolvedSymbolException("Internal type not found: " + name));
     }
@@ -62,7 +68,12 @@ public interface ResolvedTypeDeclaration extends ResolvedDeclaration {
      * (Does not include internal types inside internal types).
      */
     default boolean hasInternalType(String name) {
-        return this.internalTypes().stream().anyMatch(f -> f.getName().equals(name));
+        for (ResolvedReferenceTypeDeclaration f : this.internalTypes()) {
+            if (f.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

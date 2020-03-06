@@ -32,11 +32,11 @@ import static com.github.javaparser.ParseResult.PostProcessor;
 public class Java10PostProcessor extends PostProcessors {
     protected final PostProcessor varNodeCreator = (result, configuration) ->
             result.getResult().ifPresent(node -> {
-                node.findAll(ClassOrInterfaceType.class).forEach(n -> {
+                for (ClassOrInterfaceType n : node.findAll(ClassOrInterfaceType.class)) {
                     if (n.getNameAsString().equals("var")) {
                         n.replace(new VarType(n.getTokenRange().orElse(null)));
                     }
-                });
+                }
             });
 
     public Java10PostProcessor() {

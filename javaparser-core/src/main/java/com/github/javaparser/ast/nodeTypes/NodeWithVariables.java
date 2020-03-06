@@ -28,6 +28,7 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.metamodel.DerivedProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -124,7 +125,12 @@ public interface NodeWithVariables<N extends Node> {
      */
     @DerivedProperty
     default Optional<Type> getMaximumCommonType() {
-        return calculateMaximumCommonType(getVariables().stream().map(v -> v.getType()).collect(Collectors.toList()));
+        List<Type> list = new ArrayList<>();
+        for (VariableDeclarator v : getVariables()) {
+            Type type = v.getType();
+            list.add(type);
+        }
+        return calculateMaximumCommonType(list);
     }
 
     static Optional<Type> calculateMaximumCommonType(List<Type> types) {

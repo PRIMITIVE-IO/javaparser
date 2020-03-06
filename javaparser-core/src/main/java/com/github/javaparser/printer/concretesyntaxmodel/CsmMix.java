@@ -26,6 +26,7 @@ import com.github.javaparser.printer.SourcePrinter;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
 /**
@@ -38,8 +39,10 @@ public class CsmMix implements CsmElement {
         if (elements == null) {
             throw new NullPointerException();
         }
-        if (elements.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException("Null element in the mix");
+        for (CsmElement element : elements) {
+            if (element == null) {
+                throw new IllegalArgumentException("Null element in the mix");
+            }
         }
         this.elements = elements;
     }
@@ -50,7 +53,9 @@ public class CsmMix implements CsmElement {
 
     @Override
     public void prettyPrint(Node node, SourcePrinter printer) {
-        elements.forEach(e -> e.prettyPrint(node, printer));
+        for (CsmElement e : elements) {
+            e.prettyPrint(node, printer);
+        }
     }
 
     @Override
@@ -70,6 +75,11 @@ public class CsmMix implements CsmElement {
 
     @Override
     public String toString() {
-        return elements.stream().map(e -> e.toString()).collect(Collectors.joining(",", "CsmMix[", "]"));
+        StringJoiner joiner = new StringJoiner(",", "CsmMix[", "]");
+        for (CsmElement e : elements) {
+            String s = e.toString();
+            joiner.add(s);
+        }
+        return joiner.toString();
     }
 }

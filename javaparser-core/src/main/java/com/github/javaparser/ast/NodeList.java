@@ -265,7 +265,9 @@ public class NodeList<N extends Node> implements List<N>, Iterable<N>, HasParent
      */
     @Override
     public void forEach(Consumer<? super N> action) {
-        innerList.forEach(action);
+        for (N n : innerList) {
+            action.accept(n);
+        }
     }
 
     /**
@@ -317,7 +319,9 @@ public class NodeList<N extends Node> implements List<N>, Iterable<N>, HasParent
      */
     @Override
     public boolean addAll(Collection<? extends N> c) {
-        c.forEach(this::add);
+        for (N n : c) {
+            add(n);
+        }
         return !c.isEmpty();
     }
 
@@ -350,7 +354,13 @@ public class NodeList<N extends Node> implements List<N>, Iterable<N>, HasParent
     @Override
     public boolean retainAll(Collection<?> c) {
         boolean changed = false;
-        for (Object e : this.stream().filter(it -> !c.contains(it)).toArray()) {
+        List<N> list = new ArrayList<>();
+        for (N it : this) {
+            if (!c.contains(it)) {
+                list.add(it);
+            }
+        }
+        for (Object e : list.toArray()) {
             if (!c.contains(e)) {
                 changed = remove(e) || changed;
             }
@@ -374,7 +384,13 @@ public class NodeList<N extends Node> implements List<N>, Iterable<N>, HasParent
     @Override
     public boolean removeIf(Predicate<? super N> filter) {
         boolean changed = false;
-        for (Object e : this.stream().filter(filter).toArray()) {
+        List<N> list = new ArrayList<>();
+        for (N n : this) {
+            if (filter.test(n)) {
+                list.add(n);
+            }
+        }
+        for (Object e : list.toArray()) {
             changed = remove(e) || changed;
         }
         return changed;
@@ -463,15 +479,21 @@ public class NodeList<N extends Node> implements List<N>, Iterable<N>, HasParent
     }
 
     private void notifyElementAdded(int index, Node nodeAddedOrRemoved) {
-        this.observers.forEach(o -> o.listChange(this, AstObserver.ListChangeType.ADDITION, index, nodeAddedOrRemoved));
+        for (AstObserver o : this.observers) {
+            o.listChange(this, AstObserver.ListChangeType.ADDITION, index, nodeAddedOrRemoved);
+        }
     }
 
     private void notifyElementRemoved(int index, Node nodeAddedOrRemoved) {
-        this.observers.forEach(o -> o.listChange(this, AstObserver.ListChangeType.REMOVAL, index, nodeAddedOrRemoved));
+        for (AstObserver o : this.observers) {
+            o.listChange(this, AstObserver.ListChangeType.REMOVAL, index, nodeAddedOrRemoved);
+        }
     }
 
     private void notifyElementReplaced(int index, Node nodeAddedOrRemoved) {
-        this.observers.forEach(o -> o.listReplacement(this, index, this.get(index), nodeAddedOrRemoved));
+        for (AstObserver o : this.observers) {
+            o.listReplacement(this, index, this.get(index), nodeAddedOrRemoved);
+        }
     }
 
     @Override
@@ -540,6 +562,11 @@ public class NodeList<N extends Node> implements List<N>, Iterable<N>, HasParent
 
     @Override
     public String toString() {
-        return innerList.stream().map(Node::toString).collect(Collectors.joining(", ", "[", "]"));
+        StringJoiner joiner = new StringJoiner(", ", "[", "]");
+        for (N n : innerList) {
+            String toString = n.toString();
+            joiner.add(toString);
+        }
+        return joiner.toString();
     }
 }

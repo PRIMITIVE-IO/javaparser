@@ -151,7 +151,13 @@ public enum ObservableProperty {
     private boolean derived;
 
     public static ObservableProperty fromCamelCaseName(String camelCaseName) {
-        Optional<ObservableProperty> observableProperty = Arrays.stream(values()).filter(v -> v.camelCaseName().equals(camelCaseName)).findFirst();
+        Optional<ObservableProperty> observableProperty = Optional.empty();
+        for (ObservableProperty v : values()) {
+            if (v.camelCaseName().equals(camelCaseName)) {
+                observableProperty = Optional.of(v);
+                break;
+            }
+        }
         if (observableProperty.isPresent()) {
             return observableProperty.get();
         } else {

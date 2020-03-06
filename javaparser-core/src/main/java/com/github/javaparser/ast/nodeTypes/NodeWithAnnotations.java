@@ -192,7 +192,12 @@ public interface NodeWithAnnotations<N extends Node> {
      * @return true if found, false if not
      */
     default boolean isAnnotationPresent(String annotationName) {
-        return getAnnotations().stream().anyMatch(a -> a.getName().getIdentifier().equals(annotationName));
+        for (AnnotationExpr a : getAnnotations()) {
+            if (a.getName().getIdentifier().equals(annotationName)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -211,7 +216,12 @@ public interface NodeWithAnnotations<N extends Node> {
      * @param annotationName the name of the annotation
      */
     default Optional<AnnotationExpr> getAnnotationByName(String annotationName) {
-        return getAnnotations().stream().filter(a -> a.getName().getIdentifier().equals(annotationName)).findFirst();
+        for (AnnotationExpr a : getAnnotations()) {
+            if (a.getName().getIdentifier().equals(annotationName)) {
+                return Optional.of(a);
+            }
+        }
+        return Optional.empty();
     }
 
     /**

@@ -34,7 +34,12 @@ public interface Change {
     default boolean evaluate(CsmConditional csmConditional, Node node) {
         switch (csmConditional.getCondition()) {
             case FLAG:
-                return csmConditional.getProperties().stream().anyMatch(p -> (Boolean) getValue(p, node));
+                for (ObservableProperty p : csmConditional.getProperties()) {
+                    if ((Boolean) getValue(p, node)) {
+                        return true;
+                    }
+                }
+                return false;
             case IS_NOT_EMPTY:
                 return !Utils.valueIsNullOrEmpty(getValue(csmConditional.getProperty(), node));
             case IS_EMPTY:

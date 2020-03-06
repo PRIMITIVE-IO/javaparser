@@ -39,11 +39,14 @@ import com.github.javaparser.metamodel.CallableDeclarationMetaModel;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.metamodel.OptionalProperty;
 import com.github.javaparser.ast.Generated;
+
+import java.util.ArrayList;
 import java.util.List;
 import static com.github.javaparser.utils.Utils.assertNotNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 /**
@@ -291,7 +294,12 @@ public abstract class CallableDeclaration<T extends CallableDeclaration<?>> exte
         }
 
         public String asString() {
-            return parameterTypes.stream().map(Type::asString).collect(joining(", ", name + "(", ")"));
+            StringJoiner joiner = new StringJoiner(", ", name + "(", ")");
+            for (Type parameterType : parameterTypes) {
+                String asString = parameterType.asString();
+                joiner.add(asString);
+            }
+            return joiner.toString();
         }
 
         @Override
@@ -301,7 +309,14 @@ public abstract class CallableDeclaration<T extends CallableDeclaration<?>> exte
     }
 
     public Signature getSignature() {
-        return new Signature(getName().getIdentifier(), getParameters().stream().map(this::getTypeWithVarargsAsArray).map(this::stripGenerics).map(this::stripAnnotations).collect(toList()));
+        List<Type> list = new ArrayList<>();
+        for (Parameter parameter : getParameters()) {
+            Type typeWithVarargsAsArray = getTypeWithVarargsAsArray(parameter);
+            Type type = stripGenerics(typeWithVarargsAsArray);
+            Type stripAnnotations = stripAnnotations(type);
+            list.add(stripAnnotations);
+        }
+        return new Signature(getName().getIdentifier(), list);
     }
 
     private Type stripAnnotations(Type type) {

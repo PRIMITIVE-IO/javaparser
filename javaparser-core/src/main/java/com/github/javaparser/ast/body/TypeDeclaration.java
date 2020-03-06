@@ -35,6 +35,8 @@ import com.github.javaparser.ast.visitor.CloneVisitor;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.metamodel.TypeDeclarationMetaModel;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -188,7 +190,16 @@ public abstract class TypeDeclaration<T extends TypeDeclaration<?>> extends Body
      * @return methods or constructors whose signatures match the passed signature.
      */
     public List<CallableDeclaration<?>> getCallablesWithSignature(CallableDeclaration.Signature signature) {
-        return getMembers().stream().filter(m -> m instanceof CallableDeclaration).map(m -> ((CallableDeclaration<?>) m)).filter(m -> m.getSignature().equals(signature)).collect(toList());
+        List<CallableDeclaration<?>> list = new ArrayList<>();
+        for (BodyDeclaration<?> m : getMembers()) {
+            if (m instanceof CallableDeclaration) {
+                CallableDeclaration<?> callableDeclaration = ((CallableDeclaration<?>) m);
+                if (callableDeclaration.getSignature().equals(signature)) {
+                    list.add(callableDeclaration);
+                }
+            }
+        }
+        return list;
     }
 
     /**

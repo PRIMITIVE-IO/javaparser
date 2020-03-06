@@ -30,6 +30,7 @@ import com.github.javaparser.ast.modules.*;
 import com.github.javaparser.ast.observer.ObservableProperty;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.*;
+import com.github.javaparser.metamodel.BaseNodeMetaModel;
 import com.github.javaparser.metamodel.JavaParserMetaModel;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmConditional;
 import com.github.javaparser.printer.concretesyntaxmodel.CsmElement;
@@ -940,10 +941,13 @@ public class ConcreteSyntaxModel {
                 newline()
         ));
 
-        List<String> unsupportedNodeClassNames = JavaParserMetaModel.getNodeMetaModels().stream()
-                .filter(c -> !c.isAbstract() && !Comment.class.isAssignableFrom(c.getType()) && !concreteSyntaxModelByClass.containsKey(c.getType()))
-                .map(nm -> nm.getType().getSimpleName())
-                .collect(Collectors.toList());
+        List<String> unsupportedNodeClassNames = new ArrayList<>();
+        for (BaseNodeMetaModel c : JavaParserMetaModel.getNodeMetaModels()) {
+            if (!c.isAbstract() && !Comment.class.isAssignableFrom(c.getType()) && !concreteSyntaxModelByClass.containsKey(c.getType())) {
+                String simpleName = c.getType().getSimpleName();
+                unsupportedNodeClassNames.add(simpleName);
+            }
+        }
         if (unsupportedNodeClassNames.isEmpty()) {
             initializationError = Optional.empty();
         } else {

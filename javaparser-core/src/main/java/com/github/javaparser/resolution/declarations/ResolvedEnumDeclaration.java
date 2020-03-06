@@ -22,6 +22,7 @@
 package com.github.javaparser.resolution.declarations;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Declaration of an Enum.
@@ -44,11 +45,22 @@ public interface ResolvedEnumDeclaration extends ResolvedReferenceTypeDeclaratio
     List<ResolvedEnumConstantDeclaration> getEnumConstants();
 
     default boolean hasEnumConstant(String name) {
-        return getEnumConstants().stream().anyMatch(c -> c.getName().equals(name));
+        for (ResolvedEnumConstantDeclaration c : getEnumConstants()) {
+            if (c.getName().equals(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     default ResolvedEnumConstantDeclaration getEnumConstant(final String name) {
-        return getEnumConstants().stream().filter(c -> c.getName().equals(name)).findFirst()
+        for (ResolvedEnumConstantDeclaration c : getEnumConstants()) {
+            if (c.getName().equals(name)) {
+                return Optional.of(c)
+                        .orElseThrow(() -> new IllegalArgumentException("No constant named " + name));
+            }
+        }
+        return Optional.<ResolvedEnumConstantDeclaration>empty()
                 .orElseThrow(() -> new IllegalArgumentException("No constant named " + name));
     }
 }

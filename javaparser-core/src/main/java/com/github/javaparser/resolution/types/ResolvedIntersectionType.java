@@ -58,19 +58,31 @@ public class ResolvedIntersectionType implements ResolvedType {
 
     @Override
     public String describe() {
-        return String.join(" & ", elements.stream().map(ResolvedType::describe).collect(Collectors.toList()));
+        List<String> list = new ArrayList<>();
+        for (ResolvedType element : elements) {
+            String describe = element.describe();
+            list.add(describe);
+        }
+        return String.join(" & ", list);
     }
 
     @Override
     public boolean isAssignableBy(ResolvedType other) {
-        return elements.stream().allMatch(e -> e.isAssignableBy(other));
+        for (ResolvedType e : elements) {
+            if (!e.isAssignableBy(other)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     @Override
     public ResolvedType replaceTypeVariables(ResolvedTypeParameterDeclaration tp, ResolvedType replaced, Map<ResolvedTypeParameterDeclaration, ResolvedType> inferredTypes) {
-        List<ResolvedType> elementsReplaced = elements.stream()
-                .map(e -> e.replaceTypeVariables(tp, replaced, inferredTypes))
-                .collect(Collectors.toList());
+        List<ResolvedType> elementsReplaced = new ArrayList<>();
+        for (ResolvedType e : elements) {
+            ResolvedType resolvedType = e.replaceTypeVariables(tp, replaced, inferredTypes);
+            elementsReplaced.add(resolvedType);
+        }
         if (elementsReplaced.equals(elements)) {
             return this;
         } else {

@@ -123,8 +123,9 @@ public final class JavaParser {
             N resultNode = start.parse(parser);
             ParseResult<N> result = new ParseResult<>(resultNode, parser.problems, parser.getCommentsCollection());
 
-            configuration.getPostProcessors().forEach(postProcessor ->
-                    postProcessor.process(result, configuration));
+            for (ParseResult.PostProcessor postProcessor : configuration.getPostProcessors()) {
+                postProcessor.process(result, configuration);
+            }
 
             result.getProblems().sort(PROBLEM_BY_BEGIN_POSITION);
 

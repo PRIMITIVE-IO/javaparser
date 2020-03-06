@@ -208,18 +208,28 @@ public class LexicalPreservingPrinter {
         private List<ChildTextElement> findChildTextElementForComment(Comment oldValue, NodeText nodeText) {
             List<ChildTextElement> matchingChildElements;
 
-            matchingChildElements = nodeText.getElements().stream()
-                    .filter(e -> e.isChild())
-                    .map(c -> (ChildTextElement) c)
-                    .filter(c -> c.isComment())
-                    .filter(c -> ((Comment) c.getChild()).getContent().equals(oldValue.getContent()))
-                    .collect(toList());
+            List<ChildTextElement> result = new ArrayList<>();
+            for (TextElement e : nodeText.getElements()) {
+                if (e.isChild()) {
+                    ChildTextElement c = (ChildTextElement) e;
+                    if (c.isComment()) {
+                        if (((Comment) c.getChild()).getContent().equals(oldValue.getContent())) {
+                            result.add(c);
+                        }
+                    }
+                }
+            }
+            matchingChildElements = result;
 
             if (matchingChildElements.size() > 1) {
                 // Duplicate child nodes found, refine the result
-                matchingChildElements = matchingChildElements.stream()
-                        .filter(t -> isEqualRange(t.getChild().getRange(), oldValue.getRange()))
-                        .collect(toList());
+                List<ChildTextElement> list = new ArrayList<>();
+                for (ChildTextElement t : matchingChildElements) {
+                    if (isEqualRange(t.getChild().getRange(), oldValue.getRange())) {
+                        list.add(t);
+                    }
+                }
+                matchingChildElements = list;
             }
 
             if (matchingChildElements.size() != 1) {
@@ -233,30 +243,49 @@ public class LexicalPreservingPrinter {
             List<TokenTextElement> matchingTokens;
 
             if (oldValue instanceof JavadocComment) {
-                matchingTokens = nodeText.getElements().stream()
-                        .filter(e -> e.isToken(JAVADOC_COMMENT))
-                        .map(e -> (TokenTextElement) e)
-                        .filter(t -> t.getText().equals("/**" + oldValue.getContent() + "*/"))
-                        .collect(toList());
+                List<TokenTextElement> list = new ArrayList<>();
+                for (TextElement e : nodeText.getElements()) {
+                    if (e.isToken(JAVADOC_COMMENT)) {
+                        TokenTextElement t = (TokenTextElement) e;
+                        if (t.getText().equals("/**" + oldValue.getContent() + "*/")) {
+                            list.add(t);
+                        }
+                    }
+                }
+                matchingTokens = list;
             } else if (oldValue instanceof BlockComment) {
-                matchingTokens = nodeText.getElements().stream()
-                        .filter(e -> e.isToken(MULTI_LINE_COMMENT))
-                        .map(e -> (TokenTextElement) e)
-                        .filter(t -> t.getText().equals("/*" + oldValue.getContent() + "*/"))
-                        .collect(toList());
+                List<TokenTextElement> list = new ArrayList<>();
+                for (TextElement e : nodeText.getElements()) {
+                    if (e.isToken(MULTI_LINE_COMMENT)) {
+                        TokenTextElement t = (TokenTextElement) e;
+                        if (t.getText().equals("/*" + oldValue.getContent() + "*/")) {
+                            list.add(t);
+                        }
+                    }
+                }
+                matchingTokens = list;
             } else {
-                matchingTokens = nodeText.getElements().stream()
-                        .filter(e -> e.isToken(SINGLE_LINE_COMMENT))
-                        .map(e -> (TokenTextElement) e)
-                        .filter(t -> t.getText().trim().equals(("//" + oldValue.getContent()).trim()))
-                        .collect(toList());
+                List<TokenTextElement> list = new ArrayList<>();
+                for (TextElement e : nodeText.getElements()) {
+                    if (e.isToken(SINGLE_LINE_COMMENT)) {
+                        TokenTextElement t = (TokenTextElement) e;
+                        if (t.getText().trim().equals(("//" + oldValue.getContent()).trim())) {
+                            list.add(t);
+                        }
+                    }
+                }
+                matchingTokens = list;
             }
 
             if (matchingTokens.size() > 1) {
                 // Duplicate comments found, refine the result
-                matchingTokens = matchingTokens.stream()
-                        .filter(t -> isEqualRange(t.getToken().getRange(), oldValue.getRange()))
-                        .collect(toList());
+                List<TokenTextElement> list = new ArrayList<>();
+                for (TokenTextElement t : matchingTokens) {
+                    if (isEqualRange(t.getToken().getRange(), oldValue.getRange())) {
+                        list.add(t);
+                    }
+                }
+                matchingTokens = list;
             }
 
             return matchingTokens;
@@ -384,7 +413,12 @@ public class LexicalPreservingPrinter {
             elements.add(new Pair<>(token.getRange().get(), new TokenTextElement(token)));
         }
         elements.sort(comparing(e -> e.a.begin));
-        node.setData(NODE_TEXT_DATA, new NodeText(elements.stream().map(p -> p.b).collect(toList())));
+        List<TextElement> list = new ArrayList<>();
+        for (Pair<Range, TextElement> p : elements) {
+            TextElement b = p.b;
+            list.add(b);
+        }
+        node.setData(NODE_TEXT_DATA, new NodeText(list));
     }
 
     //
@@ -526,7 +560,9 @@ public class LexicalPreservingPrinter {
             }
 
             if (pendingIndentation && !(element instanceof CsmToken && ((CsmToken) element).isNewLine())) {
-                indentation.forEach(nodeText::addElement);
+                for (TokenTextElement tokenTextElement : indentation) {
+                    nodeText.addElement(tokenTextElement);
+                }
             }
 
             pendingIndentation = false;
@@ -540,7 +576,9 @@ public class LexicalPreservingPrinter {
                 }
             } else if (element instanceof CsmMix) {
                 CsmMix csmMix = (CsmMix) element;
-                csmMix.getElements().forEach(e -> interpret(node, e, nodeText));
+                for (CsmElement e : csmMix.getElements()) {
+                    interpret(node, e, nodeText);
+                }
             } else {
                 // Indentation should probably be dealt with before because an indentation has effects also on the
                 // following lines

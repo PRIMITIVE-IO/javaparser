@@ -158,7 +158,9 @@ class LexicalDifferenceCalculator {
     private void calculatedSyntaxModelForNode(CsmElement csm, Node node, List<CsmElement> elements, Change change) {
         if (csm instanceof CsmSequence) {
             CsmSequence csmSequence = (CsmSequence) csm;
-            csmSequence.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, elements, change));
+            for (CsmElement e : csmSequence.getElements()) {
+                calculatedSyntaxModelForNode(e, node, elements, change);
+            }
         } else if (csm instanceof CsmComment) {
             // nothing to do
         } else if (csm instanceof CsmSingleReference) {
@@ -277,7 +279,9 @@ class LexicalDifferenceCalculator {
         } else if (csm instanceof CsmMix) {
             CsmMix csmMix = (CsmMix)csm;
             List<CsmElement> mixElements = new LinkedList<>();
-            csmMix.getElements().forEach(e -> calculatedSyntaxModelForNode(e, node, mixElements, change));
+            for (CsmElement e : csmMix.getElements()) {
+                calculatedSyntaxModelForNode(e, node, mixElements, change);
+            }
             elements.add(new CsmMix(mixElements));
         } else if (csm instanceof CsmChild) {
             elements.add(csm);

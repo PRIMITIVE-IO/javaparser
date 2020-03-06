@@ -21,10 +21,7 @@
 
 package com.github.javaparser.utils;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.github.javaparser.ast.Node;
@@ -138,12 +135,22 @@ public class VisitorSet<N extends Node> implements Set<N> {
 
     @Override
     public Object[] toArray() {
-        return innerSet.stream().map(facade -> facade.overridden).collect(Collectors.toList()).toArray();
+        List<N> list = new ArrayList<>();
+        for (EqualsHashcodeOverridingFacade facade : innerSet) {
+            N overridden = facade.overridden;
+            list.add(overridden);
+        }
+        return list.toArray();
     }
 
     @Override
     public <T> T[] toArray(T[] arr) {
-        return innerSet.stream().map(facade -> facade.overridden).collect(Collectors.toList()).toArray(arr);
+        List<N> list = new ArrayList<>();
+        for (EqualsHashcodeOverridingFacade facade : innerSet) {
+            N overridden = facade.overridden;
+            list.add(overridden);
+        }
+        return list.toArray(arr);
     }
 
     @Override

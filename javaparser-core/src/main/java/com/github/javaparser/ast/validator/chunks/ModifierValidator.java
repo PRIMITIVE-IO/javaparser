@@ -111,7 +111,9 @@ public class ModifierValidator extends VisitorValidator {
     @Override
     public void visit(ConstructorDeclaration n, ProblemReporter reporter) {
         validateModifiers(n, reporter, PUBLIC, PROTECTED, PRIVATE);
-        n.getParameters().forEach(p -> validateModifiers(p, reporter, FINAL));
+        for (Parameter p : n.getParameters()) {
+            validateModifiers(p, reporter, FINAL);
+        }
         super.visit(n, reporter);
     }
 
@@ -151,16 +153,18 @@ public class ModifierValidator extends VisitorValidator {
                 }
             }
         }
-        n.getParameters().forEach(p -> validateModifiers(p, reporter, FINAL));
+        for (Parameter p : n.getParameters()) {
+            validateModifiers(p, reporter, FINAL);
+        }
         super.visit(n, reporter);
     }
 
     @Override
     public void visit(LambdaExpr n, ProblemReporter reporter) {
-        n.getParameters().forEach(p -> {
-            // Final is not allowed on inferred parameters, but those get caught by the parser.
+        // Final is not allowed on inferred parameters, but those get caught by the parser.
+        for (Parameter p : n.getParameters()) {
             validateModifiers(p, reporter, FINAL);
-        });
+        }
         super.visit(n, reporter);
     }
 

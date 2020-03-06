@@ -377,7 +377,9 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable,
         if (newParentNode == parentNode) {
             return this;
         }
-        observers.forEach(o -> o.parentChange(this, parentNode, newParentNode));
+        for (AstObserver o : observers) {
+            o.parentChange(this, parentNode, newParentNode);
+        }
         // remove from old parent, if any
         if (parentNode != null) {
             final List<Node> parentChildNodes = parentNode.childNodes;
@@ -561,7 +563,9 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable,
     }
 
     public <P> void notifyPropertyChange(ObservableProperty property, P oldValue, P newValue) {
-        this.observers.forEach(o -> o.propertyChange(this, property, oldValue, newValue));
+        for (AstObserver o : this.observers) {
+            o.propertyChange(this, property, oldValue, newValue);
+        }
     }
 
     @Override
@@ -602,7 +606,9 @@ public abstract class Node implements Cloneable, HasParentNode<Node>, Visitable,
      */
     public void registerForSubtree(AstObserver observer) {
         register(observer);
-        this.getChildNodes().forEach(c -> c.registerForSubtree(observer));
+        for (Node c : this.getChildNodes()) {
+            c.registerForSubtree(observer);
+        }
         for (PropertyMetaModel property : getMetaModel().getAllPropertyMetaModels()) {
             if (property.isNodeList()) {
                 NodeList<?> nodeList = (NodeList<?>) property.getValue(this);
