@@ -42,7 +42,6 @@ import static com.github.javaparser.ast.Node.Parsedness.UNPARSABLE;
 import static com.github.javaparser.utils.PositionUtils.sortByBeginPosition;
 import static com.github.javaparser.utils.Utils.*;
 import static java.util.Comparator.comparingInt;
-import static java.util.stream.Collectors.joining;
 
 /**
  * Outputs the AST as formatted Java source code.
@@ -1282,11 +1281,25 @@ public class PrettyPrintVisitor implements VoidVisitor<Void> {
         printer.println(" {");
         printer.indent();
         if (n.getEntries().isNonEmpty()) {
-            final boolean alignVertically =
-                    // Either we hit the constant amount limit in the configurations, or...
-                    n.getEntries().size() > configuration.getMaxEnumConstantsToAlignHorizontally() ||
-                            // any of the constants has a comment.
-                            n.getEntries().stream().anyMatch(e -> e.getComment().isPresent());
+            final boolean alignVertically;
+
+
+            boolean b = false;
+            for (EnumConstantDeclaration enumConstantDeclaration : n.getEntries()) {
+                if (enumConstantDeclaration.getComment().isPresent()) {
+                    // any of the constants has a comment.
+                    b = true;
+                    break;
+                }
+            }
+            if (b) {
+                alignVertically = true;
+            } else if (n.getEntries().size() > configuration.getMaxEnumConstantsToAlignHorizontally()) {
+                // or we hit the constant amount limit in the configurations
+                alignVertically = true;
+            } else {
+                alignVertically = false;
+            }
             printer.println();
             for (final Iterator<EnumConstantDeclaration> i = n.getEntries().iterator(); i.hasNext(); ) {
                 final EnumConstantDeclaration e = i.next();
