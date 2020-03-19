@@ -28,9 +28,7 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.metamodel.DerivedProperty;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -133,26 +131,27 @@ public interface NodeWithVariables<N extends Node> {
         return calculateMaximumCommonType(list);
     }
 
-    static Optional<Type> calculateMaximumCommonType(List<Type> types) {
-        // we use a local class because we cannot use an helper static method in an interface
-        class Helper {
-            // Conceptually: given a type we start from the Element Type and get as many array levels as indicated
-            // From the implementation point of view we start from the actual type and we remove how many array
-            // levels as needed to get the target level of arrays
-            // It returns null if the type has less array levels then the desired target
-            private Optional<Type> toArrayLevel(Type type, int level) {
-                if (level > type.getArrayLevel()) {
+    class Helper {
+        // Conceptually: given a type we start from the Element Type and get as many array levels as indicated
+        // From the implementation point of view we start from the actual type and we remove how many array
+        // levels as needed to get the target level of arrays
+        // It returns null if the type has less array levels then the desired target
+        private Optional<Type> toArrayLevel(Type type, int level) {
+            if (level > type.getArrayLevel()) {
+                return Optional.empty();
+            }
+            for (int i = type.getArrayLevel(); i > level; i--) {
+                if (!(type instanceof ArrayType)) {
                     return Optional.empty();
                 }
-                for (int i = type.getArrayLevel(); i > level; i--) {
-                    if (!(type instanceof ArrayType)) {
-                        return Optional.empty();
-                    }
-                    type = ((ArrayType) type).getComponentType();
-                }
-                return Optional.of(type);
+                type = ((ArrayType) type).getComponentType();
             }
+            return Optional.of(type);
         }
+    }
+
+    static Optional<Type> calculateMaximumCommonType(List<Type> types) {
+        // we use a local class because we cannot use an helper static method in an interface        
 
         Helper helper = new Helper();
         int level = 0;
@@ -164,11 +163,15 @@ public interface NodeWithVariables<N extends Node> {
             // Now, given that equality on nodes consider the position the simplest way is to compare
             // the pretty-printed string got for a node. We just check all them are the same and if they
             // are we just just is not null
-            Object[] values = types.stream().map(v -> {
-                Optional<Type> t = helper.toArrayLevel(v, currentLevel);
-                return t.map(Node::toString).orElse(null);
-            }).distinct().toArray();
-            if (values.length == 1 && values[0] != null) {
+            List<String> values = new ArrayList<>();
+            Set<String> uniqueValues = new HashSet<>();
+            for (Type v : types) {
+                String x = X(helper, v, currentLevel);
+                if (uniqueValues.add(x)) {
+                    values.add(x);
+                }
+            }
+            if (values.size() == 1 && values.get(0) != null) {
                 level++;
             } else {
                 keepGoing = false;
@@ -176,5 +179,9 @@ public interface NodeWithVariables<N extends Node> {
         }
         return helper.toArrayLevel(types.get(0), --level);
     }
-
+    
+    static String X(Helper helper, Type v,  int currentLevel) {
+        Optional<Type> t = helper.toArrayLevel(v, currentLevel);
+        return t.map(Node::toString).orElse(null);
+    }
 }
