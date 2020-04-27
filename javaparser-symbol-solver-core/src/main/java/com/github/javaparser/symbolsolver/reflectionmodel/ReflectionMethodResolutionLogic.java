@@ -40,7 +40,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * @author Federico Tomassetti
@@ -117,15 +116,24 @@ class ReflectionMethodResolutionLogic {
         }
 
         final List<ResolvedType> finalTypeParameterValues = typeParameterValues;
-        argumentsTypes = argumentsTypes.stream().map((pt) -> {
-            int i = 0;
-            for (ResolvedTypeParameterDeclaration tp : scopeType.getTypeParameters()) {
-                pt = pt.replaceTypeVariables(tp, finalTypeParameterValues.get(i));
-                i++;
-            }
-            return pt;
-        }).collect(Collectors.toList());
+        List<ResolvedType> list = new ArrayList<>();
+        for (ResolvedType pt : argumentsTypes) {
+            list.add(ResolvedTypeFrom(pt, scopeType, finalTypeParameterValues));
+        }
+        argumentsTypes = list;
         return MethodResolutionLogic.findMostApplicableUsage(methods, name, argumentsTypes, typeSolver);
+    }
+
+    static ResolvedType ResolvedTypeFrom(
+            ResolvedType pt,
+            ResolvedReferenceTypeDeclaration scopeType,
+            List<ResolvedType> finalTypeParameterValues){
+        int i = 0;
+        for (ResolvedTypeParameterDeclaration tp : scopeType.getTypeParameters()) {
+            pt = pt.replaceTypeVariables(tp, finalTypeParameterValues.get(i));
+            i++;
+        }
+        return pt;
     }
 
     private static MethodUsage replaceParams(List<ResolvedType> typeParameterValues, ResolvedReferenceTypeDeclaration typeParametrizable, ResolvedMethodDeclaration methodDeclaration) {
