@@ -22,7 +22,6 @@
 package com.github.javaparser.resolution.types;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A union type is defined in java as list of types separates by pipes.

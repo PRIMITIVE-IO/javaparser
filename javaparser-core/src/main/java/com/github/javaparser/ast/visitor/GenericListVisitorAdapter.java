@@ -32,7 +32,6 @@ import com.github.javaparser.ast.type.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 /**
  * A visitor that has a return value of ({@link List List<R>}), and has a default implementation for all its visit

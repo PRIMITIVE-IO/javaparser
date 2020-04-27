@@ -47,7 +47,7 @@ import javassist.bytecode.SyntheticAttribute;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

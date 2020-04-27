@@ -34,8 +34,9 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.Providers.provider;
 import static org.junit.jupiter.api.Assumptions.assumeFalse;
@@ -84,14 +85,14 @@ class Issue2035Test {
                     .findAll(MethodCallExpr.class);
 
             assumeFalse(matches.isEmpty(), "Cannot attempt resolving types if no matches.");
-            matches.forEach(methodCallExpr -> {
+            for (MethodCallExpr methodCallExpr : matches) {
                 try {
                     methodCallExpr.resolve().getReturnType();
                     methodCallExpr.calculateResolvedType(); //
                 } catch (UnsupportedOperationException e) {
                     Assertions.fail("Resolution failed.", e);
                 }
-            });
+            }
         });
 
     }
@@ -118,21 +119,23 @@ class Issue2035Test {
         );
 
         parseResult.getResult().ifPresent(compilationUnit -> {
-            final List<MethodCallExpr> matches = compilationUnit
-                    .findAll(MethodCallExpr.class)
-                    .stream()
-                    .filter(methodCallExpr -> methodCallExpr.getNameAsString().equals("get"))
-                    .collect(Collectors.toList());
+            final List<MethodCallExpr> matches = new ArrayList<>();
+            for (MethodCallExpr callExpr : compilationUnit
+                    .findAll(MethodCallExpr.class)) {
+                if (callExpr.getNameAsString().equals("get")) {
+                    matches.add(callExpr);
+                }
+            }
 
             assumeFalse(matches.isEmpty(), "Cannot attempt resolving types if no matches.");
-            matches.forEach(methodCallExpr -> {
+            for (MethodCallExpr methodCallExpr : matches) {
                 try {
                     methodCallExpr.resolve().getReturnType();
                     methodCallExpr.calculateResolvedType();
                 } catch (UnsupportedOperationException e) {
                     Assertions.fail("Resolution failed.", e);
                 }
-            });
+            }
         });
 
     }
@@ -158,21 +161,23 @@ class Issue2035Test {
         );
 
         parseResult.getResult().ifPresent(compilationUnit -> {
-            final List<MethodCallExpr> matches = compilationUnit
-                    .findAll(MethodCallExpr.class)
-                    .stream()
-                    .filter(methodCallExpr -> methodCallExpr.getNameAsString().equals("get"))
-                    .collect(Collectors.toList());
+            final List<MethodCallExpr> matches = new ArrayList<>();
+            for (MethodCallExpr callExpr : compilationUnit
+                    .findAll(MethodCallExpr.class)) {
+                if (callExpr.getNameAsString().equals("get")) {
+                    matches.add(callExpr);
+                }
+            }
 
             assumeFalse(matches.isEmpty(), "Cannot attempt resolving types if no matches.");
-            matches.forEach(methodCallExpr -> {
+            for (MethodCallExpr methodCallExpr : matches) {
                 try {
                     methodCallExpr.resolve().getReturnType();
                     methodCallExpr.calculateResolvedType();
                 } catch (UnsupportedOperationException e) {
                     Assertions.fail("Resolution failed.", e);
                 }
-            });
+            }
         });
     }
 

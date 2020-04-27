@@ -40,7 +40,6 @@ import com.github.javaparser.ast.type.PrimitiveType;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.github.javaparser.StaticJavaParser.parse;
 import static com.github.javaparser.StaticJavaParser.parseExpression;

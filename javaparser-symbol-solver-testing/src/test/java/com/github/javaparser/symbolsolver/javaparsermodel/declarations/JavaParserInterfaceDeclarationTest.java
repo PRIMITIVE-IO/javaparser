@@ -48,10 +48,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+
 
 import static com.github.javaparser.ast.Modifier.Keyword.PRIVATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -171,7 +169,12 @@ class JavaParserInterfaceDeclarationTest extends AbstractSymbolResolutionTest {
     @Test
     void testGetAllSuperclassesWithoutTypeParameters() {
         JavaParserClassDeclaration cu = (JavaParserClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), cu.getAllSuperClasses().stream().map(i -> i.getQualifiedName()).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType i : cu.getAllSuperClasses()) {
+            String qualifiedName = i.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), set);
     }
 
     @Test
@@ -346,7 +349,12 @@ class JavaParserInterfaceDeclarationTest extends AbstractSymbolResolutionTest {
     @Test
     void testGetAllAncestorsWithoutTypeParameters() {
         JavaParserClassDeclaration cu = (JavaParserClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of("java.lang.Cloneable", "com.github.javaparser.ast.Node", "java.lang.Object"), cu.getAllAncestors().stream().map(i -> i.getQualifiedName()).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType i : cu.getAllAncestors()) {
+            String qualifiedName = i.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("java.lang.Cloneable", "com.github.javaparser.ast.Node", "java.lang.Object"), set);
     }
 
     @Test
@@ -599,9 +607,11 @@ class JavaParserInterfaceDeclarationTest extends AbstractSymbolResolutionTest {
         Set<ResolvedMethodDeclaration> allMethods = constructorDeclaration.getDeclaredMethods();
         assertEquals(20, allMethods.size());
 
-        List<ResolvedMethodDeclaration> sortedMethods = allMethods.stream()
-                .sorted(Comparator.comparing(ResolvedMethodLikeDeclaration::getQualifiedSignature))
-                .collect(Collectors.toList());
+        List<ResolvedMethodDeclaration> sortedMethods = new ArrayList<>();
+        for (ResolvedMethodDeclaration allMethod : allMethods) {
+            sortedMethods.add(allMethod);
+        }
+        sortedMethods.sort(Comparator.comparing(ResolvedMethodLikeDeclaration::getQualifiedSignature));
 
         assertEquals("com.github.javaparser.ast.body.ConstructorDeclaration.accept(com.github.javaparser.ast.visitor.GenericVisitor<R, A>, A)", sortedMethods.get(0).getQualifiedSignature());
         assertEquals("com.github.javaparser.ast.body.ConstructorDeclaration.accept(com.github.javaparser.ast.visitor.VoidVisitor<A>, A)", sortedMethods.get(1).getQualifiedSignature());
@@ -631,11 +641,17 @@ class JavaParserInterfaceDeclarationTest extends AbstractSymbolResolutionTest {
 
         Set<MethodUsage> allMethods = constructorDeclaration.getAllMethods();
 
-        List<MethodUsage> sortedMethods = allMethods.stream()
-                .sorted(Comparator.comparing(MethodUsage::getQualifiedSignature))
-                .collect(Collectors.toList());
+        List<MethodUsage> sortedMethods = new ArrayList<>();
+        for (MethodUsage allMethod : allMethods) {
+            sortedMethods.add(allMethod);
+        }
+        sortedMethods.sort(Comparator.comparing(MethodUsage::getQualifiedSignature));
 
-        List<String> signatures = sortedMethods.stream().map(m -> m.getQualifiedSignature()).collect(Collectors.toList());
+        List<String> signatures = new ArrayList<>();
+        for (MethodUsage m : sortedMethods) {
+            String qualifiedSignature = m.getQualifiedSignature();
+            signatures.add(qualifiedSignature);
+        }
 
         assertEquals(ImmutableList.of("com.github.javaparser.ast.Node.addOrphanComment(com.github.javaparser.ast.comments.Comment)",
                 "com.github.javaparser.ast.Node.clone()",

@@ -38,7 +38,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.utils.PositionUtils.sortByBeginPosition;
 import static com.github.javaparser.utils.Utils.isNullOrEmpty;

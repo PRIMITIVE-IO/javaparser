@@ -86,7 +86,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.jar.JarFile;
-import java.util.stream.Collectors;
+
 import java.util.stream.Stream;
 
 import static com.intellij.openapi.application.ApplicationManager.getApplication;

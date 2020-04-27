@@ -42,7 +42,7 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.symbolsolver.javaparser.Navigator.demandParentNode;
 

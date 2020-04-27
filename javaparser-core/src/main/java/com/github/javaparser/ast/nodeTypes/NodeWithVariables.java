@@ -29,7 +29,6 @@ import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.metamodel.DerivedProperty;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A node which has a list of variables.

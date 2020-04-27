@@ -2,7 +2,7 @@ package com.github.javaparser.ast.nodeTypes;
 
 import java.util.Arrays;
 import java.util.EnumSet;
-import java.util.stream.Collectors;
+
 
 import com.github.javaparser.ast.Modifier;
 

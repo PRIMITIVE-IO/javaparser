@@ -27,7 +27,6 @@ import com.github.javaparser.printer.SourcePrinter;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 /**
  * A group of elements that could be in any order.

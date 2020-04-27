@@ -24,7 +24,7 @@ package com.github.javaparser.ast.comments;
 import java.util.Collection;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.ast.Node.NODE_BY_BEGIN_POSITION;
 

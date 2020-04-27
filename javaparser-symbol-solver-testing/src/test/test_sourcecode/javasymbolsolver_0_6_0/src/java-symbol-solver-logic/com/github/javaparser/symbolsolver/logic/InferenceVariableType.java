@@ -24,7 +24,7 @@ import com.github.javaparser.symbolsolver.model.typesystem.Wildcard;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 /**
  * An element using during type inference.

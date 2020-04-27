@@ -30,7 +30,6 @@ import com.github.javaparser.resolution.declarations.HasAccessSpecifier;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.github.javaparser.ast.NodeList.toNodeList;
 

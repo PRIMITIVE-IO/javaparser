@@ -34,7 +34,7 @@ import javassist.*;
 import javassist.bytecode.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

@@ -46,7 +46,7 @@ import com.github.javaparser.symbolsolver.model.typesystem.ReferenceTypeImpl;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

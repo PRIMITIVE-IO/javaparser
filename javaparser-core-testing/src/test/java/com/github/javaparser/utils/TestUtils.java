@@ -34,7 +34,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
+
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -171,7 +171,11 @@ public class TestUtils {
     }
 
     public static void assertProblems(List<Problem> result, String... expectedArg) {
-        Set<String> actual = result.stream().map(Problem::toString).collect(Collectors.toSet());
+        Set<String> actual = new HashSet<>();
+        for (Problem problem : result) {
+            String toString = problem.toString();
+            actual.add(toString);
+        }
         Set<String> expected = new HashSet<>(asList(expectedArg));
         assertCollections(expected, actual);
     }

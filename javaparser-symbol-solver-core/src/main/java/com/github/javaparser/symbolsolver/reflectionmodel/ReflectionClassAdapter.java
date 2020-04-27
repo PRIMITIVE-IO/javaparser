@@ -34,7 +34,7 @@ import com.github.javaparser.symbolsolver.model.typesystem.ReferenceTypeImpl;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

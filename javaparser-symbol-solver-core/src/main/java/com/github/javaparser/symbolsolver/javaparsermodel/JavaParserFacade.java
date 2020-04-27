@@ -51,7 +51,7 @@ import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 import com.github.javaparser.utils.Log;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.symbolsolver.javaparser.Navigator.demandParentNode;
 import static com.github.javaparser.symbolsolver.model.resolution.SymbolReference.*;

@@ -20,7 +20,7 @@ import com.github.javaparser.symbolsolver.model.declarations.*;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

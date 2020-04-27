@@ -29,7 +29,7 @@ import com.github.javaparser.resolution.types.ResolvedWildcard;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
+
 
 /**
  * An element using during type inference.
@@ -106,13 +106,21 @@ public class InferenceVariableType implements ResolvedType {
     private Set<ResolvedType> concreteEquivalentTypesAlsoIndirectly(Set<InferenceVariableType> considered, InferenceVariableType inferenceVariableType) {
         considered.add(inferenceVariableType);
         Set<ResolvedType> result = new HashSet<>();
-        result.addAll(inferenceVariableType.equivalentTypes.stream().filter(t -> !t.isTypeVariable() && !(t instanceof InferenceVariableType)).collect(Collectors.toSet()));
-        inferenceVariableType.equivalentTypes.stream().filter(t -> t instanceof InferenceVariableType).forEach(t -> {
-            InferenceVariableType ivt = (InferenceVariableType)t;
-            if (!considered.contains(ivt)) {
-                result.addAll(concreteEquivalentTypesAlsoIndirectly(considered, ivt));
+        Set<ResolvedType> set = new HashSet<>();
+        for (ResolvedType equivalentType : inferenceVariableType.equivalentTypes) {
+            if (!equivalentType.isTypeVariable() && !(equivalentType instanceof InferenceVariableType)) {
+                set.add(equivalentType);
             }
-        });
+        }
+        result.addAll(set);
+        for (ResolvedType t : inferenceVariableType.equivalentTypes) {
+            if (t instanceof InferenceVariableType) {
+                InferenceVariableType ivt = (InferenceVariableType) t;
+                if (!considered.contains(ivt)) {
+                    result.addAll(concreteEquivalentTypesAlsoIndirectly(considered, ivt));
+                }
+            }
+        }
         return result;
     }
 
@@ -128,9 +136,12 @@ public class InferenceVariableType implements ResolvedType {
         if (concreteEquivalent.size() == 1) {
             return concreteEquivalent.iterator().next();
         }
-        Set<ResolvedType> notTypeVariables = equivalentTypes.stream()
-                                                    .filter(t -> !t.isTypeVariable() && !hasInferenceVariables(t))
-                                                    .collect(Collectors.toSet());
+        Set<ResolvedType> notTypeVariables = new HashSet<>();
+        for (ResolvedType t : equivalentTypes) {
+            if (!t.isTypeVariable() && !hasInferenceVariables(t)) {
+                notTypeVariables.add(t);
+            }
+        }
         if (notTypeVariables.size() == 1) {
             return notTypeVariables.iterator().next();
         } else if (notTypeVariables.size() == 0 && !superTypes.isEmpty()) {

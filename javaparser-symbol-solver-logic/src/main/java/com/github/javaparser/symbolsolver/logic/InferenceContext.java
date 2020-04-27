@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti
@@ -76,11 +76,21 @@ public class InferenceContext {
             if (!formalTypeAsReference.getQualifiedName().equals(actualTypeAsReference.getQualifiedName())) {
                 List<ResolvedReferenceType> ancestors = actualTypeAsReference.getAllAncestors();
                 final String formalParamTypeQName = formalTypeAsReference.getQualifiedName();
-                List<ResolvedType> correspondingFormalType = ancestors.stream().filter((a) -> a.getQualifiedName().equals(formalParamTypeQName)).collect(Collectors.toList());
+                List<ResolvedType> correspondingFormalType = new ArrayList<>();
+                for (ResolvedReferenceType ancestor : ancestors) {
+                    if (ancestor.getQualifiedName().equals(formalParamTypeQName)) {
+                        correspondingFormalType.add(ancestor);
+                    }
+                }
                 if (correspondingFormalType.isEmpty()) {
                     ancestors = formalTypeAsReference.getAllAncestors();
                     final String actualParamTypeQname = actualTypeAsReference.getQualifiedName();
-                    List<ResolvedType> correspondingActualType = ancestors.stream().filter(a -> a.getQualifiedName().equals(actualParamTypeQname)).collect(Collectors.toList());
+                    List<ResolvedType> correspondingActualType = new ArrayList<>();
+                    for (ResolvedReferenceType a : ancestors) {
+                        if (a.getQualifiedName().equals(actualParamTypeQname)) {
+                            correspondingActualType.add(a);
+                        }
+                    }
                     if (correspondingActualType.isEmpty()) {
                         throw new ConfilictingGenericTypesException(formalType, actualType);
                     }

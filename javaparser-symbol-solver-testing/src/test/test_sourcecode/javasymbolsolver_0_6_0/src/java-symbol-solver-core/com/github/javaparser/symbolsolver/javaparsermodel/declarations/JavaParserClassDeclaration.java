@@ -40,7 +40,7 @@ import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 import com.google.common.collect.ImmutableList;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

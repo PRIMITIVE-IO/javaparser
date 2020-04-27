@@ -32,7 +32,7 @@ import com.github.javaparser.utils.Pair;
 
 import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.symbolsolver.resolution.typeinference.TypeHelper.*;
 

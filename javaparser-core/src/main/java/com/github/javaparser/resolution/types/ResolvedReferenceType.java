@@ -33,7 +33,6 @@ import com.github.javaparser.resolution.types.parametrization.ResolvedTypeParame
 import com.github.javaparser.utils.Pair;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.github.javaparser.ast.Modifier.Keyword.PRIVATE;
 

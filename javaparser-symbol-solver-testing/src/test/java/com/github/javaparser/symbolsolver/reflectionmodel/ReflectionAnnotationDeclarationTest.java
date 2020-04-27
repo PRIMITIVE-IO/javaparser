@@ -26,11 +26,15 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import com.github.javaparser.resolution.declarations.ResolvedDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import java.util.Collections;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Set;
+
+
 import org.junit.jupiter.api.Test;
 
 @interface OuterAnnotation {
@@ -65,8 +69,13 @@ class ReflectionAnnotationDeclarationTest {
     ReflectionAnnotationDeclaration annotation =
         (ReflectionAnnotationDeclaration) typeSolver.solveType(
             "com.github.javaparser.symbolsolver.reflectionmodel.OuterAnnotation");
+    Set<String> set = new HashSet<>();
+    for (ResolvedReferenceTypeDeclaration resolvedReferenceTypeDeclaration : annotation.internalTypes()) {
+      String name = resolvedReferenceTypeDeclaration.getName();
+      set.add(name);
+    }
     assertEquals(Collections.singleton("InnerAnnotation"),
-        annotation.internalTypes().stream().map(ResolvedDeclaration::getName).collect(Collectors.toSet()));
+            set);
   }
 
   @Test

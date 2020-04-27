@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -105,8 +106,12 @@ class MethodCallExprContextResolutionTest extends AbstractResolutionTest {
 		Optional<MethodUsage> ref = context.solveMethodAsUsage(callMethodName, Collections.emptyList());
 		assertTrue(ref.isPresent());
 		assertEquals("MethodCalls", ref.get().declaringType().getQualifiedName());
-		assertEquals(Collections.singletonList("java.lang.Integer"), ref.get().typeParametersMap().getTypes().stream()
-				.map(ty -> ty.asReferenceType().describe()).collect(Collectors.toList()));
+		List<String> list = new ArrayList<>();
+		for (ResolvedType ty : ref.get().typeParametersMap().getTypes()) {
+			String describe = ty.asReferenceType().describe();
+			list.add(describe);
+		}
+		assertEquals(Collections.singletonList("java.lang.Integer"), list);
 	}
 
 	@Test
@@ -133,8 +138,12 @@ class MethodCallExprContextResolutionTest extends AbstractResolutionTest {
 		Optional<MethodUsage> ref = context.solveMethodAsUsage(callMethodName, argumentsTypes);
 		assertTrue(ref.isPresent());
 		assertEquals("MethodCalls", ref.get().declaringType().getQualifiedName());
-		assertEquals(Collections.singletonList("java.lang.String"), ref.get().typeParametersMap().getTypes().stream()
-				.map(ty -> ty.asReferenceType().describe()).collect(Collectors.toList()));
+		List<String> list = new ArrayList<>();
+		for (ResolvedType ty : ref.get().typeParametersMap().getTypes()) {
+			String describe = ty.asReferenceType().describe();
+			list.add(describe);
+		}
+		assertEquals(Collections.singletonList("java.lang.String"), list);
 	}
 
 	@Test

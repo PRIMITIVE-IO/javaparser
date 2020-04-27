@@ -35,7 +35,8 @@ import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+
 
 import static java.util.Comparator.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -47,9 +48,11 @@ class ReflectionInterfaceDeclarationTest extends AbstractSymbolResolutionTest {
     void testGetDeclaredMethods() {
         TypeSolver typeResolver = new ReflectionTypeSolver();
         ResolvedReferenceTypeDeclaration list = new ReflectionInterfaceDeclaration(List.class, typeResolver);
-        List<ResolvedMethodDeclaration> methods = list.getDeclaredMethods().stream()
-                .sorted(comparing(ResolvedDeclaration::getName))
-                .collect(Collectors.toList());
+        List<ResolvedMethodDeclaration> methods = new ArrayList<>();
+        for (ResolvedMethodDeclaration resolvedMethodDeclaration : list.getDeclaredMethods()) {
+            methods.add(resolvedMethodDeclaration);
+        }
+        methods.sort(comparing(ResolvedDeclaration::getName));
         int foundCount = 0;
         for (ResolvedMethodDeclaration method : methods) {
             switch (method.getName()) {

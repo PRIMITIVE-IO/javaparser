@@ -42,7 +42,7 @@ import java.io.Serializable;
 import java.nio.Buffer;
 import java.nio.CharBuffer;
 import java.util.*;
-import java.util.stream.Collectors;
+
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -333,7 +333,14 @@ class ReferenceTypeTest {
 
         // To debug the following
         List<ResolvedReferenceType> ancestors = right.getAllAncestors();
-        ResolvedReferenceType moreBazzingAncestor = ancestors.stream().filter(a -> a.getQualifiedName().endsWith("Bazzer")).findFirst().get();
+        Optional<ResolvedReferenceType> found = Optional.empty();
+        for (ResolvedReferenceType a : ancestors) {
+            if (a.getQualifiedName().endsWith("Bazzer")) {
+                found = Optional.of(a);
+                break;
+            }
+        }
+        ResolvedReferenceType moreBazzingAncestor = found.get();
 
         assertEquals(true, left.isAssignableBy(right));
 
@@ -479,7 +486,9 @@ class ReferenceTypeTest {
         ResolvedReferenceType rawArrayList = new ReferenceTypeImpl(arraylist, typeResolver);
 
         Map<String, ResolvedReferenceType> ancestors = new HashMap<>();
-        rawArrayList.getAllAncestors().forEach(a -> ancestors.put(a.getQualifiedName(), a));
+        for (ResolvedReferenceType a : rawArrayList.getAllAncestors()) {
+            ancestors.put(a.getQualifiedName(), a);
+        }
         assertEquals(9, ancestors.size());
 
         ResolvedTypeVariable tv = new ResolvedTypeVariable(arraylist.getTypeParameters().get(0));
@@ -502,7 +511,9 @@ class ReferenceTypeTest {
         ResolvedReferenceType listOfString = new ReferenceTypeImpl(list, ImmutableList.of(string), typeResolver);
 
         Map<String, ResolvedReferenceType> ancestors = new HashMap<>();
-        listOfString.getAllAncestors().forEach(a -> ancestors.put(a.getQualifiedName(), a));
+        for (ResolvedReferenceType a : listOfString.getAllAncestors()) {
+            ancestors.put(a.getQualifiedName(), a);
+        }
         assertEquals(3, ancestors.size());
 
         assertEquals(new ReferenceTypeImpl(new ReflectionInterfaceDeclaration(Collection.class, typeResolver), ImmutableList.of(string), typeResolver), ancestors.get("java.util.Collection"));
@@ -518,7 +529,9 @@ class ReferenceTypeTest {
         ResolvedReferenceType abstractCollectionOfString = new ReferenceTypeImpl(abstractCollection, ImmutableList.of(string), typeResolver);
 
         Map<String, ResolvedReferenceType> ancestors = new HashMap<>();
-        abstractCollectionOfString.getAllAncestors().forEach(a -> ancestors.put(a.getQualifiedName(), a));
+        for (ResolvedReferenceType a : abstractCollectionOfString.getAllAncestors()) {
+            ancestors.put(a.getQualifiedName(), a);
+        }
         assertEquals(3, ancestors.size());
 
         assertEquals(new ReferenceTypeImpl(new ReflectionInterfaceDeclaration(Collection.class, typeResolver), ImmutableList.of(string), typeResolver), ancestors.get("java.util.Collection"));
@@ -534,7 +547,9 @@ class ReferenceTypeTest {
         ResolvedReferenceType abstractListOfString = new ReferenceTypeImpl(abstractList, ImmutableList.of(string), typeResolver);
 
         Map<String, ResolvedReferenceType> ancestors = new HashMap<>();
-        abstractListOfString.getAllAncestors().forEach(a -> ancestors.put(a.getQualifiedName(), a));
+        for (ResolvedReferenceType a : abstractListOfString.getAllAncestors()) {
+            ancestors.put(a.getQualifiedName(), a);
+        }
         assertEquals(5, ancestors.size());
 
         assertEquals(new ReferenceTypeImpl(new ReflectionClassDeclaration(AbstractCollection.class, typeResolver), ImmutableList.of(string), typeResolver), ancestors.get("java.util.AbstractCollection"));
@@ -552,7 +567,9 @@ class ReferenceTypeTest {
         ResolvedReferenceType arrayListOfString = new ReferenceTypeImpl(arraylist, ImmutableList.of(string), typeResolver);
 
         Map<String, ResolvedReferenceType> ancestors = new HashMap<>();
-        arrayListOfString.getAllAncestors().forEach(a -> ancestors.put(a.getQualifiedName(), a));
+        for (ResolvedReferenceType a : arrayListOfString.getAllAncestors()) {
+            ancestors.put(a.getQualifiedName(), a);
+        }
         assertEquals(9, ancestors.size());
 
         assertEquals(new ReferenceTypeImpl(new ReflectionInterfaceDeclaration(RandomAccess.class, typeResolver), typeResolver), ancestors.get("java.util.RandomAccess"));
@@ -580,7 +597,14 @@ class ReferenceTypeTest {
         ResolvedInterfaceDeclaration streamInterface = new ReflectionInterfaceDeclaration(Stream.class, typeResolver);
         ResolvedReferenceType stream = new ReferenceTypeImpl(streamInterface, typeResolver);
 
-        ResolvedMethodDeclaration streamMap = streamInterface.getDeclaredMethods().stream().filter(m -> m.getName().equals("map")).findFirst().get();
+        Optional<ResolvedMethodDeclaration> found = Optional.empty();
+        for (ResolvedMethodDeclaration m : streamInterface.getDeclaredMethods()) {
+            if (m.getName().equals("map")) {
+                found = Optional.of(m);
+                break;
+            }
+        }
+        ResolvedMethodDeclaration streamMap = found.get();
         ResolvedTypeParameterDeclaration streamMapR = streamMap.findTypeParameter("T").get();
         ResolvedTypeVariable typeVariable = new ResolvedTypeVariable(streamMapR);
         stream = stream.deriveTypeParameters(stream.typeParametersMap().toBuilder().setValue(stream.getTypeDeclaration().getTypeParameters().get(0), typeVariable).build());
@@ -598,7 +622,14 @@ class ReferenceTypeTest {
         ResolvedInterfaceDeclaration streamInterface = new ReflectionInterfaceDeclaration(Stream.class, typeResolver);
         ResolvedReferenceType stream = new ReferenceTypeImpl(streamInterface, typeResolver);
 
-        ResolvedMethodDeclaration streamMap = streamInterface.getDeclaredMethods().stream().filter(m -> m.getName().equals("map")).findFirst().get();
+        Optional<ResolvedMethodDeclaration> found = Optional.empty();
+        for (ResolvedMethodDeclaration m : streamInterface.getDeclaredMethods()) {
+            if (m.getName().equals("map")) {
+                found = Optional.of(m);
+                break;
+            }
+        }
+        ResolvedMethodDeclaration streamMap = found.get();
         ResolvedTypeParameterDeclaration streamMapR = streamMap.findTypeParameter("T").get();
         ResolvedTypeVariable typeVariable = new ResolvedTypeVariable(streamMapR);
         stream = stream.deriveTypeParameters(stream.typeParametersMap().toBuilder().setValue(stream.getTypeDeclaration().getTypeParameters().get(0), typeVariable).build());
@@ -643,7 +674,11 @@ class ReferenceTypeTest {
     void testDirectAncestorsOfClassWithoutSuperClassOrInterfaces() {
         ResolvedReferenceType buffer = new ReferenceTypeImpl(
                 new ReflectionClassDeclaration(Buffer.class, typeSolver), typeSolver);
-        Set<String> ancestors = buffer.getDirectAncestors().stream().map(a -> a.describe()).collect(Collectors.toSet());
+        Set<String> ancestors = new HashSet<>();
+        for (ResolvedReferenceType a : buffer.getDirectAncestors()) {
+            String describe = a.describe();
+            ancestors.add(describe);
+        }
         assertEquals(new HashSet<>(Arrays.asList("java.lang.Object")), ancestors);
     }
 
@@ -651,7 +686,11 @@ class ReferenceTypeTest {
     void testDirectAncestorsOfObjectClass() {
         ResolvedReferenceType object = new ReferenceTypeImpl(
                 new ReflectionClassDeclaration(Object.class, typeSolver), typeSolver);
-        Set<String> ancestors = object.getDirectAncestors().stream().map(a -> a.describe()).collect(Collectors.toSet());
+        Set<String> ancestors = new HashSet<>();
+        for (ResolvedReferenceType a : object.getDirectAncestors()) {
+            String describe = a.describe();
+            ancestors.add(describe);
+        }
         assertEquals(new HashSet<>(), ancestors);
     }
 
@@ -659,14 +698,22 @@ class ReferenceTypeTest {
     void testDirectAncestorsOfClassWithSuperClass() {
         ResolvedReferenceType charbuffer = new ReferenceTypeImpl(
                 new ReflectionClassDeclaration(CharBuffer.class, typeSolver), typeSolver);
-        Set<String> ancestors = charbuffer.getDirectAncestors().stream().map(a -> a.describe()).collect(Collectors.toSet());
+        Set<String> ancestors = new HashSet<>();
+        for (ResolvedReferenceType a : charbuffer.getDirectAncestors()) {
+            String describe = a.describe();
+            ancestors.add(describe);
+        }
         assertEquals(new HashSet<>(Arrays.asList("java.lang.CharSequence", "java.lang.Appendable",
                 "java.nio.Buffer", "java.lang.Readable", "java.lang.Comparable<java.nio.CharBuffer>")), ancestors);
     }
 
     @Test
     void testDirectAncestorsOfClassWithInterfaces() {
-        Set<String> ancestors = string.getDirectAncestors().stream().map(a -> a.describe()).collect(Collectors.toSet());
+        Set<String> ancestors = new HashSet<>();
+        for (ResolvedReferenceType a : string.getDirectAncestors()) {
+            String describe = a.describe();
+            ancestors.add(describe);
+        }
         assertTrue(ancestors.containsAll(Arrays.asList("java.lang.CharSequence",
                 "java.lang.Object",
                 "java.lang.Comparable<java.lang.String>",
@@ -690,13 +737,48 @@ class ReferenceTypeTest {
         ResolvedReferenceType rtB = new ReferenceTypeImpl(classB.resolve(), typeSolver);
 
         assertEquals(3, rtA.getDeclaredFields().size());
-        assertTrue(rtA.getDeclaredFields().stream().anyMatch(f -> f.getName().equals("i")));
-        assertTrue(rtA.getDeclaredFields().stream().anyMatch(f -> f.getName().equals("c")));
-        assertTrue(rtA.getDeclaredFields().stream().anyMatch(f -> f.getName().equals("l")));
+        boolean b2 = false;
+        for (ResolvedFieldDeclaration f1 : rtA.getDeclaredFields()) {
+            if (f1.getName().equals("i")) {
+                b2 = true;
+                break;
+            }
+        }
+        assertTrue(b2);
+        boolean result1 = false;
+        for (ResolvedFieldDeclaration declaration : rtA.getDeclaredFields()) {
+            if (declaration.getName().equals("c")) {
+                result1 = true;
+                break;
+            }
+        }
+        assertTrue(result1);
+        boolean b1 = false;
+        for (ResolvedFieldDeclaration fieldDeclaration : rtA.getDeclaredFields()) {
+            if (fieldDeclaration.getName().equals("l")) {
+                b1 = true;
+                break;
+            }
+        }
+        assertTrue(b1);
 
         assertEquals(2, rtB.getDeclaredFields().size());
-        assertTrue(rtB.getDeclaredFields().stream().anyMatch(f -> f.getName().equals("f")));
-        assertTrue(rtB.getDeclaredFields().stream().anyMatch(f -> f.getName().equals("b")));
+        boolean result = false;
+        for (ResolvedFieldDeclaration resolvedFieldDeclaration : rtB.getDeclaredFields()) {
+            if (resolvedFieldDeclaration.getName().equals("f")) {
+                result = true;
+                break;
+            }
+        }
+        assertTrue(result);
+        boolean b = false;
+        for (ResolvedFieldDeclaration f : rtB.getDeclaredFields()) {
+            if (f.getName().equals("b")) {
+                b = true;
+                break;
+            }
+        }
+        assertTrue(b);
     }
 
     @Test
@@ -716,12 +798,47 @@ class ReferenceTypeTest {
         ResolvedReferenceType rtB = new ReferenceTypeImpl(classB.resolve(), typeSolver);
 
         assertEquals(2, rtA.getAllFieldsVisibleToInheritors().size());
-        assertTrue(rtA.getAllFieldsVisibleToInheritors().stream().anyMatch(f -> f.getName().equals("c")));
-        assertTrue(rtA.getAllFieldsVisibleToInheritors().stream().anyMatch(f -> f.getName().equals("l")));
+        boolean b2 = false;
+        for (ResolvedFieldDeclaration f1 : rtA.getAllFieldsVisibleToInheritors()) {
+            if (f1.getName().equals("c")) {
+                b2 = true;
+                break;
+            }
+        }
+        assertTrue(b2);
+        boolean result1 = false;
+        for (ResolvedFieldDeclaration declaration : rtA.getAllFieldsVisibleToInheritors()) {
+            if (declaration.getName().equals("l")) {
+                result1 = true;
+                break;
+            }
+        }
+        assertTrue(result1);
 
         assertEquals(3, rtB.getAllFieldsVisibleToInheritors().size());
-        assertTrue(rtB.getAllFieldsVisibleToInheritors().stream().anyMatch(f -> f.getName().equals("c")));
-        assertTrue(rtB.getAllFieldsVisibleToInheritors().stream().anyMatch(f -> f.getName().equals("l")));
-        assertTrue(rtB.getAllFieldsVisibleToInheritors().stream().anyMatch(f -> f.getName().equals("b")));
+        boolean b1 = false;
+        for (ResolvedFieldDeclaration fieldDeclaration : rtB.getAllFieldsVisibleToInheritors()) {
+            if (fieldDeclaration.getName().equals("c")) {
+                b1 = true;
+                break;
+            }
+        }
+        assertTrue(b1);
+        boolean result = false;
+        for (ResolvedFieldDeclaration resolvedFieldDeclaration : rtB.getAllFieldsVisibleToInheritors()) {
+            if (resolvedFieldDeclaration.getName().equals("l")) {
+                result = true;
+                break;
+            }
+        }
+        assertTrue(result);
+        boolean b = false;
+        for (ResolvedFieldDeclaration f : rtB.getAllFieldsVisibleToInheritors()) {
+            if (f.getName().equals("b")) {
+                b = true;
+                break;
+            }
+        }
+        assertTrue(b);
     }
 }

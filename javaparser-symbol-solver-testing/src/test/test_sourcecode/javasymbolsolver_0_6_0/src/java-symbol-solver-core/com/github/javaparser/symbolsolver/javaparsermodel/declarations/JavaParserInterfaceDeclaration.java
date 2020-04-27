@@ -37,7 +37,7 @@ import com.github.javaparser.symbolsolver.model.typesystem.Type;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

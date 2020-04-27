@@ -22,7 +22,7 @@ import javassist.bytecode.BadBytecode;
 import javassist.bytecode.SignatureAttribute;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti

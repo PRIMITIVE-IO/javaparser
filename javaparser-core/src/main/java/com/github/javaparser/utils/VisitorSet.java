@@ -22,7 +22,7 @@
 package com.github.javaparser.utils;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.visitor.GenericVisitor;

@@ -27,7 +27,7 @@ import static com.github.javaparser.utils.Utils.ensureNotNull;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.utils.ClassUtils;
@@ -43,7 +43,7 @@ import com.github.javaparser.utils.ClassUtils;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.utils.Utils.ensureNotNull;
 

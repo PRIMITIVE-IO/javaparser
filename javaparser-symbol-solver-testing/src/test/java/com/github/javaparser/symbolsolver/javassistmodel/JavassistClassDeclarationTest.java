@@ -37,11 +37,8 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
+
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -242,46 +239,102 @@ class JavassistClassDeclarationTest extends AbstractSymbolResolutionTest {
     @Test
     void testGetAllSuperclasses() {
         JavassistClassDeclaration cu = (JavassistClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), cu.getAllSuperClasses().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : cu.getAllSuperClasses()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), set);
     }
 
     @Test
     void testGetAllAncestors() {
         JavassistClassDeclaration cu = (JavassistClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), cu.getAllAncestors().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : cu.getAllAncestors()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), set);
     }
 
     @Test
     void testGetInterfaces() {
         JavassistClassDeclaration compilationUnit = (JavassistClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of(), compilationUnit.getInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> result = new HashSet<>();
+        for (ResolvedReferenceType referenceType : compilationUnit.getInterfaces()) {
+            String name = referenceType.getQualifiedName();
+            result.add(name);
+        }
+        assertEquals(ImmutableSet.of(), result);
 
         JavassistClassDeclaration coid = (JavassistClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.body.ClassOrInterfaceDeclaration");
-        assertEquals(ImmutableSet.of("com.github.javaparser.ast.DocumentableNode"), coid.getInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : coid.getInterfaces()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("com.github.javaparser.ast.DocumentableNode"), set);
     }
 
     @Test
     void testGetAllInterfaces() {
         JavassistClassDeclaration compilationUnit = (JavassistClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of(), compilationUnit.getAllInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> result = new HashSet<>();
+        for (ResolvedReferenceType referenceType : compilationUnit.getAllInterfaces()) {
+            String name = referenceType.getQualifiedName();
+            result.add(name);
+        }
+        assertEquals(ImmutableSet.of(), result);
 
         JavassistClassDeclaration coid = (JavassistClassDeclaration) typeSolver.solveType("com.github.javaparser.ast.body.ClassOrInterfaceDeclaration");
-        assertEquals(ImmutableSet.of("com.github.javaparser.ast.NamedNode", "com.github.javaparser.ast.body.AnnotableNode", "com.github.javaparser.ast.DocumentableNode"), coid.getAllInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : coid.getAllInterfaces()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("com.github.javaparser.ast.NamedNode", "com.github.javaparser.ast.body.AnnotableNode", "com.github.javaparser.ast.DocumentableNode"), set);
     }
 
     @Test
     void testGetAllSuperclassesWithoutTypeParameters() {
         JavassistClassDeclaration cu = (JavassistClassDeclaration) newTypeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), cu.getAllSuperClasses().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : cu.getAllSuperClasses()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("com.github.javaparser.ast.Node", "java.lang.Object"), set);
     }
 
     @Test
     void testGetAllSuperclassesWithTypeParameters() {
         JavassistClassDeclaration constructorDeclaration = (JavassistClassDeclaration) newTypeSolver.solveType("com.github.javaparser.ast.body.ConstructorDeclaration");
         assertEquals(3, constructorDeclaration.getAllSuperClasses().size());
-        assertTrue(constructorDeclaration.getAllSuperClasses().stream().anyMatch(s -> s.getQualifiedName().equals("com.github.javaparser.ast.body.BodyDeclaration")));
-        assertTrue(constructorDeclaration.getAllSuperClasses().stream().anyMatch(s -> s.getQualifiedName().equals("com.github.javaparser.ast.Node")));
-        assertTrue(constructorDeclaration.getAllSuperClasses().stream().anyMatch(s -> s.getQualifiedName().equals("java.lang.Object")));
+        boolean b1 = false;
+        for (ResolvedReferenceType referenceType : constructorDeclaration.getAllSuperClasses()) {
+            if (referenceType.getQualifiedName().equals("com.github.javaparser.ast.body.BodyDeclaration")) {
+                b1 = true;
+                break;
+            }
+        }
+        assertTrue(b1);
+        boolean result = false;
+        for (ResolvedReferenceType resolvedReferenceType : constructorDeclaration.getAllSuperClasses()) {
+            if (resolvedReferenceType.getQualifiedName().equals("com.github.javaparser.ast.Node")) {
+                result = true;
+                break;
+            }
+        }
+        assertTrue(result);
+        boolean b = false;
+        for (ResolvedReferenceType s : constructorDeclaration.getAllSuperClasses()) {
+            if (s.getQualifiedName().equals("java.lang.Object")) {
+                b = true;
+                break;
+            }
+        }
+        assertTrue(b);
 
         ResolvedReferenceType ancestor;
 
@@ -299,10 +352,20 @@ class JavassistClassDeclarationTest extends AbstractSymbolResolutionTest {
     @Test
     void testGetInterfacesWithoutParameters() {
         JavassistClassDeclaration compilationUnit = (JavassistClassDeclaration) newTypeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of(), compilationUnit.getInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> result = new HashSet<>();
+        for (ResolvedReferenceType referenceType : compilationUnit.getInterfaces()) {
+            String name = referenceType.getQualifiedName();
+            result.add(name);
+        }
+        assertEquals(ImmutableSet.of(), result);
 
         JavassistClassDeclaration coid = (JavassistClassDeclaration) newTypeSolver.solveType("com.github.javaparser.ast.body.ClassOrInterfaceDeclaration");
-        assertEquals(ImmutableSet.of("com.github.javaparser.ast.nodeTypes.NodeWithExtends", "com.github.javaparser.ast.nodeTypes.NodeWithImplements"), coid.getInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : coid.getInterfaces()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("com.github.javaparser.ast.nodeTypes.NodeWithExtends", "com.github.javaparser.ast.nodeTypes.NodeWithImplements"), set);
     }
 
     @Test
@@ -343,9 +406,19 @@ class JavassistClassDeclarationTest extends AbstractSymbolResolutionTest {
     @Test
     void testGetAllInterfacesWithoutParameters() {
         JavassistClassDeclaration compilationUnit = (JavassistClassDeclaration) newTypeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of("java.lang.Cloneable"), compilationUnit.getAllInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> result = new HashSet<>();
+        for (ResolvedReferenceType referenceType : compilationUnit.getAllInterfaces()) {
+            String name = referenceType.getQualifiedName();
+            result.add(name);
+        }
+        assertEquals(ImmutableSet.of("java.lang.Cloneable"), result);
 
         JavassistClassDeclaration coid = (JavassistClassDeclaration) newTypeSolver.solveType("com.github.javaparser.ast.body.ClassOrInterfaceDeclaration");
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : coid.getAllInterfaces()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
         assertEquals(ImmutableSet.of("com.github.javaparser.ast.nodeTypes.NodeWithExtends",
                 "com.github.javaparser.ast.nodeTypes.NodeWithAnnotations",
                 "java.lang.Cloneable",
@@ -353,7 +426,7 @@ class JavassistClassDeclarationTest extends AbstractSymbolResolutionTest {
                 "com.github.javaparser.ast.nodeTypes.NodeWithName",
                 "com.github.javaparser.ast.nodeTypes.NodeWithModifiers",
                 "com.github.javaparser.ast.nodeTypes.NodeWithJavaDoc",
-                "com.github.javaparser.ast.nodeTypes.NodeWithMembers"), coid.getAllInterfaces().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+                "com.github.javaparser.ast.nodeTypes.NodeWithMembers"), set);
     }
 
     @Test
@@ -440,7 +513,12 @@ class JavassistClassDeclarationTest extends AbstractSymbolResolutionTest {
     @Test
     void testGetAllAncestorsWithoutTypeParameters() {
         JavassistClassDeclaration cu = (JavassistClassDeclaration) newTypeSolver.solveType("com.github.javaparser.ast.CompilationUnit");
-        assertEquals(ImmutableSet.of("java.lang.Cloneable", "com.github.javaparser.ast.Node", "java.lang.Object"), cu.getAllAncestors().stream().map(ResolvedReferenceType::getQualifiedName).collect(Collectors.toSet()));
+        Set<String> set = new HashSet<>();
+        for (ResolvedReferenceType resolvedReferenceType : cu.getAllAncestors()) {
+            String qualifiedName = resolvedReferenceType.getQualifiedName();
+            set.add(qualifiedName);
+        }
+        assertEquals(ImmutableSet.of("java.lang.Cloneable", "com.github.javaparser.ast.Node", "java.lang.Object"), set);
     }
 
     @Test

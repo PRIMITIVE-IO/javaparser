@@ -24,6 +24,7 @@ package com.github.javaparser.symbolsolver;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration;
 import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.github.javaparser.symbolsolver.javaparser.Navigator;
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
@@ -32,7 +33,9 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeS
 import com.google.common.collect.ImmutableSet;
 import org.junit.jupiter.api.Test;
 
-import java.util.stream.Collectors;
+
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -44,8 +47,13 @@ class FindingAllFieldsTest extends AbstractResolutionTest {
         ClassOrInterfaceDeclaration classC = Navigator.demandClass(cu, "C");
         ResolvedReferenceTypeDeclaration typeDeclaration = JavaParserFacade.get(new ReflectionTypeSolver()).getTypeDeclaration(classC);
         assertEquals(3, typeDeclaration.getAllFields().size());
+        Set<String> set = new HashSet<>();
+        for (ResolvedFieldDeclaration resolvedFieldDeclaration : typeDeclaration.getAllFields()) {
+            String name = resolvedFieldDeclaration.getName();
+            set.add(name);
+        }
         assertEquals(ImmutableSet.of("a", "b", "c"),
-                typeDeclaration.getAllFields().stream().map(ResolvedDeclaration::getName).collect(Collectors.toSet()));
+                set);
     }
 
     @Test
@@ -54,8 +62,13 @@ class FindingAllFieldsTest extends AbstractResolutionTest {
         ClassOrInterfaceDeclaration classC = Navigator.demandClass(cu, "C");
         ResolvedReferenceTypeDeclaration typeDeclaration = JavaParserFacade.get(new ReflectionTypeSolver()).getTypeDeclaration(classC);
         assertEquals(3, typeDeclaration.getAllFields().size());
+        Set<String> set = new HashSet<>();
+        for (ResolvedFieldDeclaration resolvedFieldDeclaration : typeDeclaration.getAllFields()) {
+            String name = resolvedFieldDeclaration.getName();
+            set.add(name);
+        }
         assertEquals(ImmutableSet.of("a", "b", "c"),
-                typeDeclaration.getAllFields().stream().map(ResolvedDeclaration::getName).collect(Collectors.toSet()));
+                set);
         assertEquals("java.util.List<java.lang.String>", typeDeclaration.getField("b").getType().describe());
     }
 }

@@ -27,7 +27,7 @@ import com.github.javaparser.symbolsolver.model.typesystem.parametrization.TypeP
 import javaslang.Tuple2;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * A ReferenceType like a class, an interface or an enum. Note that this type can contain also the values

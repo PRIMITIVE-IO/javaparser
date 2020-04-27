@@ -32,7 +32,7 @@ import javassist.NotFoundException;
 import javassist.bytecode.*;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Fred Lefévère-Laoide

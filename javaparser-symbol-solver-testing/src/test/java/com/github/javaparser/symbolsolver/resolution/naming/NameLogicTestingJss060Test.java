@@ -31,9 +31,10 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.StaticJavaParser.parse;
 
@@ -48,11 +49,17 @@ class NameLogicTestingJss060Test extends AbstractResolutionTest {
         CompilationUnit cu = parse(sourceFile);
 
         List<Node> names = new LinkedList<>();
-        names.addAll(cu.findAll(Name.class).stream().filter(Name::isTopLevel).collect(Collectors.toList()));
+        List<Name> list = new ArrayList<>();
+        for (Name name : cu.findAll(Name.class)) {
+            if (name.isTopLevel()) {
+                list.add(name);
+            }
+        }
+        names.addAll(list);
         names.addAll(cu.findAll(SimpleName.class));
-        names.forEach(n -> {
+        for (Node n : names) {
             NameRole role = NameLogic.classifyRole(n);
-        });
+        }
     }
 
     private void classifyReferences(String projectName, String className) throws IOException {
@@ -60,13 +67,19 @@ class NameLogicTestingJss060Test extends AbstractResolutionTest {
         CompilationUnit cu = parse(sourceFile);
 
         List<Node> names = new LinkedList<>();
-        names.addAll(cu.findAll(Name.class).stream().filter(Name::isTopLevel).collect(Collectors.toList()));
+        List<Name> list = new ArrayList<>();
+        for (Name name : cu.findAll(Name.class)) {
+            if (name.isTopLevel()) {
+                list.add(name);
+            }
+        }
+        names.addAll(list);
         names.addAll(cu.findAll(SimpleName.class));
-        names.forEach(n -> {
+        for (Node n : names) {
             if (NameLogic.classifyRole(n) == NameRole.REFERENCE) {
                 NameCategory nameCategory = NameLogic.syntacticClassificationAccordingToContext(n);
             }
-        });
+        }
     }
 
     @Test

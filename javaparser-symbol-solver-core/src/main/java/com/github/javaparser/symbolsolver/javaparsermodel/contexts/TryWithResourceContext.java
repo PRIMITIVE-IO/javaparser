@@ -37,7 +37,7 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.model.resolution.Value;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.symbolsolver.javaparser.Navigator.demandParentNode;
 

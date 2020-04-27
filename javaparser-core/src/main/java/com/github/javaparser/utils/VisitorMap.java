@@ -27,7 +27,7 @@ import com.github.javaparser.ast.visitor.Visitable;
 import com.github.javaparser.ast.visitor.VoidVisitor;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
 
 /**
  * A map that overrides the equals and hashcode calculation of the added nodes

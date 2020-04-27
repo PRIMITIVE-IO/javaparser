@@ -27,9 +27,11 @@ import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.AbstractResolutionTest;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -59,7 +61,9 @@ public abstract class AbstractNameLogicTest extends AbstractResolutionTest {
         }
         ParseResult<N> parseResult = new JavaParser(parserConfiguration).parse(parseStart, new StringProvider(code));
         if (!parseResult.isSuccessful()) {
-            parseResult.getProblems().forEach(p -> System.out.println("ERR: " + p));
+            for (Problem p : parseResult.getProblems()) {
+                System.out.println("ERR: " + p);
+            }
         }
         assertTrue(parseResult.isSuccessful());
         N root = parseResult.getResult().get();
@@ -69,12 +73,18 @@ public abstract class AbstractNameLogicTest extends AbstractResolutionTest {
     private Node getNameInCode(String code, String name, ParseStart parseStart, boolean tollerant,
                                Optional<TypeSolver> typeSolver) {
         Node root = parse(code, parseStart, typeSolver);
-        List<Node> allNames = root.findAll(Node.class).stream()
-                .filter(NameLogic::isAName)
-                .collect(Collectors.toList());
-        List<Node> matchingNames = allNames.stream()
-                .filter(n -> NameLogic.nameAsString(n).equals(name))
-                .collect(Collectors.toList());
+        List<Node> allNames = new ArrayList<>();
+        for (Node node : root.findAll(Node.class)) {
+            if (NameLogic.isAName(node)) {
+                allNames.add(node);
+            }
+        }
+        List<Node> matchingNames = new ArrayList<>();
+        for (Node n : allNames) {
+            if (NameLogic.nameAsString(n).equals(name)) {
+                matchingNames.add(n);
+            }
+        }
         // In case of one name being contained in other as is, we remove it
         for (int i=0;i<matchingNames.size();i++) {
             Node container = matchingNames.get(i);

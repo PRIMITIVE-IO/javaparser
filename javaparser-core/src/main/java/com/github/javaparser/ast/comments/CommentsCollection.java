@@ -24,7 +24,6 @@ package com.github.javaparser.ast.comments;
 import com.github.javaparser.Range;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.github.javaparser.ast.Node.NODE_BY_BEGIN_POSITION;
 

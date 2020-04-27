@@ -47,6 +47,7 @@ import com.google.common.collect.Lists;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 /**
  * An anonymous class declaration representation.
  */

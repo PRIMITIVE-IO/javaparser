@@ -27,11 +27,7 @@ import com.github.javaparser.resolution.types.ResolvedType;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 /**
  * @author Federico Tomassetti
@@ -58,12 +54,16 @@ public final class FunctionalInterfaceLogic {
      */
     public static Optional<MethodUsage> getFunctionalMethod(ResolvedReferenceTypeDeclaration typeDeclaration) {
         //We need to find all abstract methods
-        Set<MethodUsage> methods = typeDeclaration.getAllMethods().stream()
-                .filter(m -> m.getDeclaration().isAbstract())
-                // Remove methods inherited by Object:
-                // Consider the case of Comparator which define equals. It would be considered a functional method.
-                .filter(m -> !declaredOnObject(m))
-                .collect(Collectors.toSet());
+        // Remove methods inherited by Object:
+        // Consider the case of Comparator which define equals. It would be considered a functional method.
+        Set<MethodUsage> methods = new HashSet<>();
+        for (MethodUsage m : typeDeclaration.getAllMethods()) {
+            if (m.getDeclaration().isAbstract()) {
+                if (!declaredOnObject(m)) {
+                    methods.add(m);
+                }
+            }
+        }
 
         if (methods.size() == 1) {
             return Optional.of(methods.iterator().next());
@@ -80,16 +80,28 @@ public final class FunctionalInterfaceLogic {
     }
 
     private static String getSignature(Method m) {
-        return String.format("%s(%s)", m.getName(), String.join(", ", Arrays.stream(m.getParameters()).map(p -> toSignature(p)).collect(Collectors.toList())));
+        List<String> list = new ArrayList<>();
+        for (Parameter p : m.getParameters()) {
+            String s = toSignature(p);
+            list.add(s);
+        }
+        return String.format("%s(%s)", m.getName(), String.join(", ", list));
     }
 
     private static String toSignature(Parameter p) {
         return p.getType().getCanonicalName();
     }
 
-    private static List<String> OBJECT_METHODS_SIGNATURES = Arrays.stream(Object.class.getDeclaredMethods())
-            .map(method -> getSignature(method))
-            .collect(Collectors.toList());
+    private static List<String> OBJECT_METHODS_SIGNATURES;
+
+    static {
+        List<String> list = new ArrayList<>();
+        for (Method method : Object.class.getDeclaredMethods()) {
+            String signature = getSignature(method);
+            list.add(signature);
+        }
+        OBJECT_METHODS_SIGNATURES = list;
+    }
 
     private static boolean declaredOnObject(MethodUsage m) {
         return OBJECT_METHODS_SIGNATURES.contains(m.getDeclaration().getSignature());

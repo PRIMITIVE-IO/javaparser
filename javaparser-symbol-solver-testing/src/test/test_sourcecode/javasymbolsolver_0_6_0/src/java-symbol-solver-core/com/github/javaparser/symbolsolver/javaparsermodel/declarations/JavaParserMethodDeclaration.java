@@ -28,7 +28,7 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.model.typesystem.Type;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import static com.github.javaparser.symbolsolver.javaparser.Navigator.getParentNode;
 

@@ -32,20 +32,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 import com.github.javaparser.*;
 import com.github.javaparser.ast.*;
-import com.github.javaparser.ast.body.AnnotationDeclaration;
-import com.github.javaparser.ast.body.AnnotationMemberDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.InitializerDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.body.Parameter;
-import com.github.javaparser.ast.body.VariableDeclarator;
+import com.github.javaparser.ast.body.*;
 import com.github.javaparser.ast.comments.LineComment;
 import com.github.javaparser.ast.expr.AnnotationExpr;
 import com.github.javaparser.ast.expr.ArrayCreationExpr;
@@ -114,8 +108,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         ClassOrInterfaceDeclaration classA = cu.getClassByName("A").get();
         FieldDeclaration fd = classA.getFieldByName("i").get();
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(fd);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("int", " ", "i", ";"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -127,8 +126,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         FieldDeclaration fd = classA.getFieldByName("i").get();
         VariableDeclarator vd = fd.getVariables().get(0);
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(vd);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("i"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -139,8 +143,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         ClassOrInterfaceDeclaration classA = cu.getClassByName("A").get();
         MethodDeclaration md = classA.getMethodsByName("foo").get(0);
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(md);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("void", " ", "foo", "(", "int p1", ",", " ", "float p2", ")", " ", "{ }"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -152,8 +161,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         MethodDeclaration md = classA.getMethodsByName("foo").get(0);
         Parameter p1 = md.getParameterByName("p1").get();
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(p1);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("int", " ", "p1"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -166,8 +180,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         Parameter p1 = md.getParameterByName("p1").get();
         Type t = p1.getType();
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(t);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("int"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -177,8 +196,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
 
         ImportDeclaration imp = (ImportDeclaration) cu.getChildNodes().get(0);
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(imp);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("import", " ", "a.b.c.D", ";", ""),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -199,8 +223,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         Node t = field.getCommonType();
         Node t2 = field.getVariable(0).getType();
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(field);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("ParseResult", "<", "T", ">", " ", "result", ";"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -210,10 +239,15 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
 
         AnnotationDeclaration ad = cu.getAnnotationDeclarationByName("ClassPreamble").get();
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(ad);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(
                 Arrays.asList("public", " ", "@", "interface", " ", "ClassPreamble", " ", "{", " ", "String author();",
                         " ", "}", ""),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -224,8 +258,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         AnnotationDeclaration ad = cu.getAnnotationDeclarationByName("ClassPreamble").get();
         AnnotationMemberDeclaration md = (AnnotationMemberDeclaration) ad.getMember(0);
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(md);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("String", " ", "author", "(", ")", ";"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -236,8 +275,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         AnnotationDeclaration ad = cu.getAnnotationDeclarationByName("ClassPreamble").get();
         AnnotationMemberDeclaration md = (AnnotationMemberDeclaration) ad.getMember(0);
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(md);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("String[]", " ", "author", "(", ")", ";"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -249,8 +293,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         AnnotationMemberDeclaration md = ad.getMember(0).asAnnotationMemberDeclaration();
         Type type = md.getType();
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(type);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("String", "[", "]"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -260,8 +309,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         AnnotationMemberDeclaration md = cu.getAnnotationDeclarationByName("ClassPreamble").get().getMember(5)
                 .asAnnotationMemberDeclaration();
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(md);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String expand = textElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList("String[]", " ", "reviewers", "(", ")", ";"),
-                nodeText.getElements().stream().map(TextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -271,9 +325,15 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         ArrayCreationExpr arrayCreationExpr = expression.asArrayCreationExpr();
         ArrayCreationLevel arrayCreationLevel = arrayCreationExpr.getLevels().get(0);
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(arrayCreationLevel);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String e = textElement.expand();
+            if (!e.isEmpty()) {
+                list.add(e);
+            }
+        }
         assertEquals(Arrays.asList("[", "]"),
-                nodeText.getElements().stream().map(TextElement::expand).filter(e -> !e.isEmpty())
-                        .collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -283,9 +343,15 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         ArrayCreationExpr arrayCreationExpr = expression.asArrayCreationExpr();
         ArrayCreationLevel arrayCreationLevel = arrayCreationExpr.getLevels().get(0);
         NodeText nodeText = LexicalPreservingPrinter.getOrCreateNodeText(arrayCreationLevel);
+        List<String> list = new ArrayList<>();
+        for (TextElement textElement : nodeText.getElements()) {
+            String e = textElement.expand();
+            if (!e.isEmpty()) {
+                list.add(e);
+            }
+        }
         assertEquals(Arrays.asList("[", "123", "]"),
-                nodeText.getElements().stream().map(TextElement::expand).filter(e -> !e.isEmpty())
-                        .collect(Collectors.toList()));
+                list);
     }
 
     //
@@ -297,8 +363,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         considerExample("AnnotationDeclaration_Example3_original");
         Node node = cu.getAnnotationDeclarationByName("ClassPreamble").get().getMember(4);
         List<TokenTextElement> indentation = LexicalPreservingPrinter.findIndentation(node);
+        List<String> list = new ArrayList<>();
+        for (TokenTextElement tokenTextElement : indentation) {
+            String expand = tokenTextElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList(" ", " ", " "),
-                indentation.stream().map(TokenTextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     @Test
@@ -306,8 +377,13 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         considerExample("AnnotationDeclaration_Example3_original");
         Node node = cu.getAnnotationDeclarationByName("ClassPreamble").get().getMember(5);
         List<TokenTextElement> indentation = LexicalPreservingPrinter.findIndentation(node);
+        List<String> list = new ArrayList<>();
+        for (TokenTextElement tokenTextElement : indentation) {
+            String expand = tokenTextElement.expand();
+            list.add(expand);
+        }
         assertEquals(Arrays.asList(" ", " ", " "),
-                indentation.stream().map(TokenTextElement::expand).collect(Collectors.toList()));
+                list);
     }
 
     //
@@ -647,16 +723,16 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes()
-                .forEach(type -> type.getMembers()
-                        .forEach(member -> {
-                            if (member instanceof MethodDeclaration) {
-                                MethodDeclaration methodDeclaration = (MethodDeclaration) member;
-                                if (!methodDeclaration.getAnnotationByName("Override").isPresent()) {
-                                    methodDeclaration.addAnnotation("Override");
-                                }
-                            }
-                        }));
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            for (BodyDeclaration<?> member : type.getMembers()) {
+                if (member instanceof MethodDeclaration) {
+                    MethodDeclaration methodDeclaration = (MethodDeclaration) member;
+                    if (!methodDeclaration.getAnnotationByName("Override").isPresent()) {
+                        methodDeclaration.addAnnotation("Override");
+                    }
+                }
+            }
+        }
         assertEquals("public class TestPage extends Page {" + EOL +
                 EOL +
                 "   @Override()" + EOL +
@@ -913,19 +989,21 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes()
-                .forEach(type -> type.getMembers()
-                        .forEach(member -> member.ifMethodDeclaration(methodDeclaration -> {
-                            if (methodDeclaration.getAnnotationByName("Override").isPresent()) {
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            for (BodyDeclaration<?> member : type.getMembers()) {
+                member.ifMethodDeclaration(methodDeclaration -> {
+                    if (methodDeclaration.getAnnotationByName("Override").isPresent()) {
 
-                                while (methodDeclaration.getAnnotations().isNonEmpty()) {
-                                    AnnotationExpr annotationExpr = methodDeclaration.getAnnotations().get(0);
-                                    annotationExpr.remove();
-                                }
+                        while (methodDeclaration.getAnnotations().isNonEmpty()) {
+                            AnnotationExpr annotationExpr = methodDeclaration.getAnnotations().get(0);
+                            annotationExpr.remove();
+                        }
 
-                                methodDeclaration.addMarkerAnnotation("Override");
-                            }
-                        })));
+                        methodDeclaration.addMarkerAnnotation("Override");
+                    }
+                });
+            }
+        }
         assertEquals("public class TestPage extends Page {" + EOL +
                 EOL +
                 "   protected void test() {}" + EOL +
@@ -948,21 +1026,21 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes()
-                .forEach(type -> type.getMembers()
-                        .forEach(member -> {
-                            if (member instanceof MethodDeclaration) {
-                                MethodDeclaration methodDeclaration = (MethodDeclaration) member;
-                                if (methodDeclaration.getAnnotationByName("Override").isPresent()) {
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            for (BodyDeclaration<?> member : type.getMembers()) {
+                if (member instanceof MethodDeclaration) {
+                    MethodDeclaration methodDeclaration = (MethodDeclaration) member;
+                    if (methodDeclaration.getAnnotationByName("Override").isPresent()) {
 
-                                    while (methodDeclaration.getAnnotations().isNonEmpty()) {
-                                        AnnotationExpr annotationExpr = methodDeclaration.getAnnotations().get(0);
-                                        annotationExpr.remove();
-                                    }
-                                }
-                                methodDeclaration.addMarkerAnnotation("Override");
-                            }
-                        }));
+                        while (methodDeclaration.getAnnotations().isNonEmpty()) {
+                            AnnotationExpr annotationExpr = methodDeclaration.getAnnotations().get(0);
+                            annotationExpr.remove();
+                        }
+                    }
+                    methodDeclaration.addMarkerAnnotation("Override");
+                }
+            }
+        }
         assertEquals("public class TestPage extends Page {" + EOL +
                 EOL +
                 "   @Override" + EOL +
@@ -987,16 +1065,16 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes()
-                .forEach(type -> type.getMembers()
-                        .forEach(member -> {
-                            if (member instanceof MethodDeclaration) {
-                                MethodDeclaration methodDeclaration = (MethodDeclaration) member;
-                                if (!methodDeclaration.getAnnotationByName("Override").isPresent()) {
-                                    methodDeclaration.addMarkerAnnotation("Override");
-                                }
-                            }
-                        }));
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            for (BodyDeclaration<?> member : type.getMembers()) {
+                if (member instanceof MethodDeclaration) {
+                    MethodDeclaration methodDeclaration = (MethodDeclaration) member;
+                    if (!methodDeclaration.getAnnotationByName("Override").isPresent()) {
+                        methodDeclaration.addMarkerAnnotation("Override");
+                    }
+                }
+            }
+        }
         assertEquals("public class TestPage extends Page {" + EOL +
                 EOL +
                 "   @Override" + EOL +
@@ -1020,10 +1098,12 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes()
-                .forEach(type -> type.getMembers()
-                        .forEach(member -> member.ifMethodDeclaration(
-                                methodDeclaration -> methodDeclaration.addMarkerAnnotation("Override"))));
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            for (BodyDeclaration<?> member : type.getMembers()) {
+                member.ifMethodDeclaration(
+                        methodDeclaration -> methodDeclaration.addMarkerAnnotation("Override"));
+            }
+        }
         assertEquals("public class TestPage extends Page {" + EOL +
                 EOL +
                 "   @Override" + EOL +
@@ -1047,10 +1127,12 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes()
-                .forEach(type -> type.getMembers()
-                        .forEach(member -> member.ifMethodDeclaration(
-                                methodDeclaration -> methodDeclaration.addAnnotation("Override"))));
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            for (BodyDeclaration<?> member : type.getMembers()) {
+                member.ifMethodDeclaration(
+                        methodDeclaration -> methodDeclaration.addAnnotation("Override"));
+            }
+        }
         assertEquals("public class TestPage extends Page {" + EOL +
                 EOL +
                 "   @Override()" + EOL +
@@ -1080,7 +1162,9 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes().forEach(type -> type.addAndGetAnnotation(Deprecated.class));
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            type.addAndGetAnnotation(Deprecated.class);
+        }
 
         assertEquals("@Deprecated()" + EOL +
                 "public final class A {}", LexicalPreservingPrinter.print(cu));
@@ -1094,7 +1178,9 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit cu = parse(code);
         LexicalPreservingPrinter.setup(cu);
 
-        cu.getTypes().forEach(type -> type.addAndGetAnnotation(Deprecated.class));
+        for (TypeDeclaration<?> type : cu.getTypes()) {
+            type.addAndGetAnnotation(Deprecated.class);
+        }
 
         assertEquals("@Deprecated()" + EOL +
                 "public abstract class A {}", LexicalPreservingPrinter.print(cu));
@@ -1108,12 +1194,12 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit originalCu = parse(code);
         CompilationUnit cu = LexicalPreservingPrinter.setup(originalCu);
 
-        cu.findAll(ClassOrInterfaceDeclaration.class).forEach(c -> {
+        for (ClassOrInterfaceDeclaration c : cu.findAll(ClassOrInterfaceDeclaration.class)) {
             List<MethodDeclaration> methods = c.getMethodsByName("writeExternal");
             for (MethodDeclaration method : methods) {
                 c.remove(method);
             }
-        });
+        }
         assertEqualsNoEol("public class Foo {\n" +
                 "// Some comment\n\n" +
                 "}", LexicalPreservingPrinter.print(cu));
@@ -1291,9 +1377,10 @@ class LexicalPreservingPrinterTest extends AbstractLexicalPreservingTest {
         CompilationUnit compilationUnit = parse("class X {void blubb(){X.p(\"blaubb04\");}}");
         LexicalPreservingPrinter.setup(compilationUnit);
 
-        compilationUnit
-                .findAll(MethodCallExpr.class)
-                .forEach(Node::removeForced);
+        for (MethodCallExpr methodCallExpr : compilationUnit
+                .findAll(MethodCallExpr.class)) {
+            methodCallExpr.removeForced();
+        }
 
         assertEqualsNoEol("class X {void blubb(){}}", LexicalPreservingPrinter.print(compilationUnit));
     }

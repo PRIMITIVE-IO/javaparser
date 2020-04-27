@@ -17,7 +17,7 @@ import com.github.javaparser.symbolsolver.resolution.ConstructorResolutionLogic;
 import com.github.javaparser.symbolsolver.resolution.MethodResolutionLogic;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 /**
  * @author Federico Tomassetti
